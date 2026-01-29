@@ -1,28 +1,36 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Buffet Manager Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Buffet - Detalle de Ítems</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #27ae60; --danger: #e74c3c; }
-        body { font-family: Arial, sans-serif; margin: 0; display: flex; background: #f4f7f6; }
+        :root { --primary: #1a2a3a; --accent: #27ae60; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--bg); }
         
         /* Sidebar */
-        nav { width: 250px; background: var(--primary); color: white; height: 100vh; padding: 20px; position: fixed; }
-        nav h2 { font-size: 1.2rem; border-bottom: 1px solid #555; padding-bottom: 10px; }
-        nav button { width: 100%; padding: 10px; margin: 5px 0; cursor: pointer; background: transparent; border: 1px solid #555; color: white; text-align: left; }
-        nav button:hover { background: #34495e; }
+        nav { width: 260px; background: var(--primary); color: white; height: 100vh; padding: 20px; position: fixed; }
+        nav button { width: 100%; padding: 12px; margin: 8px 0; cursor: pointer; background: #2c3e50; border: none; color: white; border-radius: 5px; text-align: left; }
+        nav button:hover { background: var(--accent); }
 
-        /* Main Content */
-        main { margin-left: 290px; padding: 20px; width: calc(100% - 320px); }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        /* Main */
+        main { margin-left: 300px; padding: 30px; width: calc(100% - 340px); }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background: #eee; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         
-        .stock-low { color: var(--danger); font-weight: bold; }
-        .btn-action { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        /* Link Estilizado para os Itens */
+        .item-link { color: #2980b9; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .item-link:hover { text-decoration: underline; color: var(--accent); }
+
+        /* Modal (Página de Informação) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: white; margin: 5% auto; padding: 30px; width: 50%; border-radius: 15px; position: relative; }
+        .close { position: absolute; right: 20px; top: 10px; font-size: 28px; cursor: pointer; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .info-box { padding: 15px; background: #f8f9fa; border-left: 5px solid var(--accent); }
         
         .hidden { display: none; }
     </style>
@@ -31,132 +39,111 @@
 
 <nav>
     <h2>BUFFET MANAGER</h2>
-    <button onclick="showPage('funcionario')">📊 Estoque Geral</button>
-    <button onclick="showPage('cliente')">🍴 Menu de Propostas</button>
-    <div id="alerts" style="margin-top: 20px; font-size: 0.8rem;"></div>
+    <button onclick="showPage('funcionario')">📦 Cámaras y Freezers</button>
+    <button onclick="showPage('cliente')">🍴 Menu Clientes</button>
 </nav>
 
-<main>
-    <!-- PAGINA FUNCIONARIO (VISTA INICIAL) -->
-    <div id="page-funcionario">
-        <h1>Gestão de Estoque e Equipamentos</h1>
-        
-        <div class="card">
-            <h3>📦 Câmaras e Prateleiras</h3>
-            <table id="table-camaras">
-                <thead>
-                    <tr><th>Item</th><th>Câmara</th><th>Estante</th><th>Qtd</th><th>Ação</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="card">
-            <h3>❄️ Freezers e Gavetas</h3>
-            <table id="table-freezers">
-                <thead>
-                    <tr><th>Item</th><th>Freezer</th><th>Gaveta</th><th>Qtd</th><th>Ação</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="card">
-            <h3>⚡ Equipamentos Eletrônicos</h3>
-            <table id="table-equip">
-                <thead>
-                    <tr><th>Equipamento</th><th>Info Técnica</th><th>Status</th><th>Ação</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- PAGINA CLIENTE -->
-    <div id="page-cliente" class="hidden">
-        <h1>Propostas de Buffet</h1>
-        <div class="card">
-            <h3>Selecione o Serviço</h3>
-            <select id="select-servico" onchange="checkAvailability()">
-                <option value="">Escolha...</option>
-                <option value="Cafe">Café da Manhã</option>
-                <option value="Almoco">Almoço</option>
-                <option value="Janta">Jantar</option>
-                <option value="Cocktail">Coquetelaria</option>
-            </select>
-            <div id="client-msg" style="margin-top:20px"></div>
-        </div>
+<main id="page-funcionario">
+    <h1>Inventario Detallado</h1>
+    <div class="card">
+        <h3>📍 Haga clic en el nombre para ver detalles técnicos</h3>
+        <table id="table-stock">
+            <thead>
+                <tr><th>Producto</th><th>Ubicación</th><th>Stock Actual</th><th>Acción</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 </main>
 
+<main id="page-cliente" class="hidden">
+    <h1>Vista Cliente</h1>
+    <div class="card"><p>Contenido del cliente aquí...</p></div>
+</main>
+
+<!-- MODAL: PAGINA DE INFORMACIÓN DEL ITEM -->
+<div id="itemModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h1 id="modalTitle" style="color:var(--primary)">Nombre del Producto</h1>
+        <hr>
+        <div class="info-grid">
+            <div class="info-box">
+                <strong>📍 Ubicación Exacta:</strong>
+                <p id="modalLoc"></p>
+            </div>
+            <div class="info-box">
+                <strong>📦 Sub-división:</strong>
+                <p id="modalSub"></p>
+            </div>
+            <div class="info-box">
+                <strong>🚨 Stock Mínimo:</strong>
+                <p id="modalMin"></p>
+            </div>
+            <div class="info-box">
+                <strong>📝 Nota Técnica:</strong>
+                <p id="modalNote">Información sobre temperatura o manejo especial.</p>
+            </div>
+        </div>
+        <div style="margin-top:30px; text-align: center;">
+            <button onclick="closeModal()" style="padding:10px 30px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer;">Regresar al Inventario</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Dados Iniciais
-    let estoque = JSON.parse(localStorage.getItem('buffet_stock')) || [
-        { id: 1, nome: "Café Arábica", tipo: "Camara", loc: "Câmara 1", sub: "Estante A", qtd: 40, min: 10, cat: "Cafe" },
-        { id: 2, nome: "Filé Mignon", tipo: "Freezer", loc: "Freezer 2", sub: "Gaveta 3", qtd: 15, min: 5, cat: "Almoco" },
-        { id: 3, nome: "Forno Turbo", tipo: "Equip", loc: "Cozinha", sub: "220V", qtd: 1, min: 0, status: "OK" }
+    // Base de datos con información extra para la "segunda página"
+    let inventario = JSON.parse(localStorage.getItem('buffet_data')) || [
+        { id: 1, nombre: "Café Arábica", tipo: "Câmara", loc: "Cámara 1", sub: "Estante A1", qtd: 50, min: 10, nota: "Mantener en lugar seco. Consumir antes de 6 meses." },
+        { id: 2, nombre: "Salmón", tipo: "Freezer", loc: "Freezer 2", sub: "Gaveta 3", qtd: 15, min: 5, nota: "Temperatura ideal: -18°C. Origen: Chile." },
+        { id: 3, nombre: "Vino Tinto", tipo: "Câmara", loc: "Cámara 2", sub: "Estante C", qtd: 10, min: 4, nota: "Posición horizontal. Evitar luz directa." }
     ];
 
     function renderStock() {
-        const tables = {
-            Camara: document.querySelector("#table-camaras tbody"),
-            Freezer: document.querySelector("#table-freezers tbody"),
-            Equip: document.querySelector("#table-equip tbody")
-        };
-        
-        Object.values(tables).forEach(t => t.innerHTML = "");
-        let alertsHTML = "<strong>Alertas:</strong><br>";
+        const tbody = document.querySelector("#table-stock tbody");
+        tbody.innerHTML = "";
 
-        estoque.forEach(item => {
-            const row = `<tr>
-                <td>${item.nome}</td>
-                <td>${item.loc}</td>
-                <td>${item.sub}</td>
-                <td class="${item.qtd <= item.min ? 'stock-low' : ''}">${item.qtd}</td>
-                <td><button class="btn-action" onclick="changeStock(${item.id}, -1)">-1</button> 
-                    <button class="btn-action" onclick="changeStock(${item.id}, 1)">+1</button></td>
-            </tr>`;
-            
-            if(item.tipo === "Equip") {
-                tables.Equip.innerHTML += `<tr><td>${item.nome}</td><td>${item.sub}</td><td>${item.status}</td><td><button class="btn-action">Info</button></td></tr>`;
-            } else {
-                tables[item.tipo].innerHTML += row;
-            }
-
-            if(item.qtd <= item.min && item.tipo !== "Equip") {
-                alertsHTML += `<span style="color:#ff6b6b">⚠️ Repor ${item.nome}</span><br>`;
-            }
+        inventario.forEach(item => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><a class="item-link" onclick="openDetails(${item.id})">${item.nombre}</a></td>
+                    <td>${item.loc} (${item.sub})</td>
+                    <td style="color:${item.qtd <= item.min ? 'red' : 'black'}"><b>${item.qtd}</b></td>
+                    <td>
+                        <button onclick="changeQty(${item.id}, 1)">+</button>
+                        <button onclick="changeQty(${item.id}, -1)">-</button>
+                    </td>
+                </tr>`;
         });
-        document.getElementById('alerts').innerHTML = alertsHTML;
-        localStorage.setItem('buffet_stock', JSON.stringify(estoque));
+        localStorage.setItem('buffet_data', JSON.stringify(inventario));
     }
 
-    function changeStock(id, val) {
-        const item = estoque.find(i => i.id === id);
-        if(item) {
-            item.qtd = Math.max(0, item.qtd + val);
-            renderStock();
-        }
+    // "Navegación" a la información del item
+    function openDetails(id) {
+        const item = inventario.find(i => i.id === id);
+        document.getElementById('modalTitle').innerText = item.nombre;
+        document.getElementById('modalLoc').innerText = item.loc;
+        document.getElementById('modalSub').innerText = item.sub;
+        document.getElementById('modalMin').innerText = item.min + " unidades";
+        document.getElementById('modalNote').innerText = item.nota;
+        document.getElementById('itemModal').style.display = "block";
     }
 
-    function showPage(page) {
-        document.getElementById('page-funcionario').classList.toggle('hidden', page !== 'funcionario');
-        document.getElementById('page-cliente').classList.toggle('hidden', page !== 'cliente');
+    function closeModal() {
+        document.getElementById('itemModal').style.display = "none";
     }
 
-    function checkAvailability() {
-        const servico = document.getElementById('select-servico').value;
-        const itensServico = estoque.filter(i => i.cat === servico);
-        const msg = document.getElementById('client-msg');
-        
-        if(itensServico.length > 0 && itensServico.every(i => i.qtd > 0)) {
-            msg.innerHTML = `<p style="color:green">✅ Itens em estoque! Podemos realizar seu ${servico}.</p>`;
-        } else {
-            msg.innerHTML = `<p style="color:red">❌ Desculpe, insumos insuficientes para este serviço.</p>`;
-        }
+    function changeQty(id, val) {
+        const item = inventario.find(i => i.id === id);
+        item.qtd = Math.max(0, item.qtd + val);
+        renderStock();
     }
 
-    // Iniciar
+    function showPage(p) {
+        document.getElementById('page-funcionario').classList.toggle('hidden', p !== 'funcionario');
+        document.getElementById('page-cliente').classList.toggle('hidden', p !== 'cliente');
+    }
+
     renderStock();
 </script>
 
