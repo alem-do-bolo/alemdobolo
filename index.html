@@ -100,28 +100,28 @@ let currentProposal = null;
 /* Mapa de propostas: cada pacote referencia produtos por id e quantidade sugerida */
 const propostas = {
   "Café Manhã": {
-    Simples: [{id:5, qty:30}, {id:3, qty:10}], // ex: pratos e polpas
-    Medio:   [{id:5, qty:50}, {id:3, qty:20}, {id:2, qty:10}],
+    Básico: [{id:5, qty:30}, {id:3, qty:10}], // ex: pratos e polpas
+    top:   [{id:5, qty:50}, {id:3, qty:20}, {id:2, qty:10}],
     Premium: [{id:5, qty:80}, {id:3, qty:30}, {id:2, qty:20}, {id:1, qty:10}]
   },
   "Coffee Meal": {
-    Simples: [{id:5, qty:20}, {id:3, qty:15}],
-    Medio:   [{id:5, qty:40}, {id:3, qty:30}, {id:2, qty:10}],
+    Básicos: [{id:5, qty:20}, {id:3, qty:15}],
+    top:   [{id:5, qty:40}, {id:3, qty:30}, {id:2, qty:10}],
     Premium: [{id:5, qty:60}, {id:3, qty:40}, {id:2, qty:20}, {id:1, qty:15}]
   },
   "Almoço": {
-    Simples:[{id:1,qty:10},{id:5,qty:40}],
-    Medio:[{id:1,qty:20},{id:5,qty:60},{id:3,qty:20}],
+    Básico:[{id:1,qty:10},{id:5,qty:40}],
+    Top:[{id:1,qty:20},{id:5,qty:60},{id:3,qty:20}],
     Premium:[{id:1,qty:35},{id:5,qty:80},{id:3,qty:30}]
   },
   "Janta": {
-    Simples:[{id:1,qty:12},{id:5,qty:40}],
-    Medio:[{id:1,qty:25},{id:5,qty:70},{id:3,qty:25}],
+    Básico:[{id:1,qty:12},{id:5,qty:40}],
+    Top:[{id:1,qty:25},{id:5,qty:70},{id:3,qty:25}],
     Premium:[{id:1,qty:40},{id:5,qty:100},{id:3,qty:40}]
   },
   "Coquetelaria": {
-    Simples:[{id:5,qty:20},{id:3,qty:10}],
-    Medio:[{id:5,qty:40},{id:3,qty:20}],
+    Básico:[{id:5,qty:20},{id:3,qty:10}],
+    Top:[{id:5,qty:40},{id:3,qty:20}],
     Premium:[{id:5,qty:60},{id:3,qty:40},{id:4,qty:1}] // inclui equipamento exemplo
   }
 };
