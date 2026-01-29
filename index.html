@@ -33,64 +33,65 @@
     .btn.ghost{background:white;border:1px solid var(--borda)}
     #proposal-preview{margin-top:18px}
     .proposal-card{width:700px;padding:22px;border-radius:10px;background:linear-gradient(180deg,#fff,#f9fafb);color:#0f172a;box-shadow:0 10px 30px rgba(2,6,23,.12)}
-    .hover-card{pointer-events:auto;background:white;border-radius:8px;padding:12px;border:1px solid var(--borda);box-shadow:0 6px 18px rgba(2,6,23,.08)}
     .note{font-size:.9rem;color:#7b341e}
     input.small{width:100%;padding:6px;border:1px solid var(--borda);border-radius:6px}
-    #hover-preview{position:fixed;left:360px;top:28px;width:calc(100% - 400px);pointer-events:none;z-index:5;display:none}
+    /* removed hover preview styles (no hover preview) */
   </style>
+
   <script>
-    // Early: unregister any old service worker to avoid "Content unavailable. Resource was not cached"
+    // Attempt to unregister old service workers early to avoid "Content unavailable. Resource was not cached"
     if ('serviceWorker' in navigator) {
       try {
         navigator.serviceWorker.getRegistrations().then(function(regs){
           regs.forEach(function(r){ try{ r.unregister(); }catch(e){} });
         }).catch(function(){});
-        // also attempt single registration removal
         navigator.serviceWorker.getRegistration().then(function(r){ if(r) try{ r.unregister(); }catch(e){} }).catch(function(){});
-      } catch(e) {
-        // fail silently
-        console.warn('SW unregister early failed', e);
-      }
+      } catch(e) { console.warn('SW unregister early failed', e); }
     }
   </script>
 </head>
 <body>
   <nav id="left-nav">
     <h2>BUFFET RIO PRO</h2>
+
     <div class="label-grupo">Armazenamento</div>
     <button class="btn-menu" data-type="categoria" data-key="Câmara">📦 Itens de Câmara</button>
     <button class="btn-menu" data-type="categoria" data-key="Freezer">❄️ Itens de Freezer</button>
+
     <div class="label-grupo">Operacional</div>
     <button class="btn-menu" data-type="categoria" data-key="Equipamento">⚡ Equipamentos</button>
     <button class="btn-menu" data-type="categoria" data-key="Material">🍽️ Materiais / Louças</button>
+
     <div class="label-grupo">Comercial - Propostas</div>
     <button class="btn-menu" data-type="proposta" data-key="Café Manhã">☕ Café Manhã</button>
     <button class="btn-menu" data-type="proposta" data-key="Coffee Meal">🥪 Coffee Meal</button>
     <button class="btn-menu" data-type="proposta" data-key="Almoço">🍛 Almoço</button>
     <button class="btn-menu" data-type="proposta" data-key="Janta">🍽️ Janta</button>
     <button class="btn-menu" data-type="proposta" data-key="Coquetelaria">🍸 Coquetelaria</button>
+
     <div class="label-grupo" style="margin-top:12px">Admin</div>
     <button class="btn-menu" data-type="admin" data-key="staff">🛟 Painel do Staff</button>
   </nav>
 
   <main>
     <div id="navegacao" class="caminho"></div>
+
     <div class="card" id="main-card">
       <h1 id="titulo-pagina">Selecione uma opção ao lado</h1>
       <div id="corpo-pagina">Passe o mouse ou clique nas opções à esquerda para ver o conteúdo correspondente.</div>
     </div>
+
     <div id="proposal-preview"></div>
     <div id="staff-area"></div>
   </main>
 
-  <div id="hover-preview"></div>
+  <!-- NO hover-preview element: preview-on-hover removed as requested -->
 
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script>
-  // Encapsular todo el JS en DOMContentLoaded y captura de errores
   document.addEventListener('DOMContentLoaded', function(){
     try {
-      // datos iniciales en localStorage (si no existen)
+      // --- initial data in localStorage if absent ---
       var estoque = JSON.parse(localStorage.getItem('buffet_rio_db')) || [
         { id:1, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante A", nome:"Carne Bovina", qtd:25, min:10, info:"-2°C", tipo:"ingrediente" },
         { id:2, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante B", nome:"Laticínios", qtd:8, min:15, info:"Validade curta", tipo:"ingrediente" },
@@ -103,12 +104,12 @@
       var equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || { 4:{status:"em evento",onde:"Casamento - Praia"} };
       localStorage.setItem('equip_status', JSON.stringify(equipamentosStatus));
 
-      // estado UI
+      // UI state
       var catAtual = '';
       var setorAtual = '';
       var currentProposal = null;
 
-      // propuestas
+      // proposals
       var propostas = {
         "Café Manhã": { "Básico":[{id:5,qty:30},{id:3,qty:10}], "Top":[{id:5,qty:50},{id:3,qty:20},{id:2,qty:10}], "Premium":[{id:5,qty:80},{id:3,qty:30},{id:2,qty:20},{id:1,qty:10}] },
         "Coffee Meal": { "Básico":[{id:5,qty:20},{id:3,qty:15}], "Top":[{id:5,qty:40},{id:3,qty:30},{id:2,qty:10}], "Premium":[{id:5,qty:60},{id:3,qty:40},{id:2,qty:20},{id:1,qty:15}] },
@@ -117,8 +118,8 @@
         "Coquetelaria": { "Básico":[{id:5,qty:20},{id:3,qty:10}], "Top":[{id:5,qty:40},{id:3,qty:20}], "Premium":[{id:5,qty:60},{id:3,qty:40},{id:4,qty:1}] }
       };
 
-      // helpers seguros
-      function escapeHtml(s){ if(s===undefined || s===null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+      // helpers
+      function escapeHtml(s){ if(s===undefined||s===null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
       function baseName(nome){ return String(nome).replace(/\s*\(.*\)\s*/g,'').trim().toLowerCase(); }
       function totalAvailableFor(id){ var prod = estoque.find(function(p){ return p.id===id; }); if(!prod) return 0; var base = baseName(prod.nome); return estoque.filter(function(p){ return baseName(p.nome)===base; }).reduce(function(s,p){ return s + p.qtd; },0); }
 
@@ -159,7 +160,7 @@
         return { allocations: allocations, shortage: shortage };
       }
 
-      // UI helpers: breadcrumbs / renderers (creación de nodos para evitar errores de string)
+      // breadcrumbs
       function setBreadcrumb(parts){
         var nav = document.getElementById('navegacao'); nav.innerHTML = '';
         parts.forEach(function(p,i){
@@ -173,7 +174,7 @@
       function showDefaultMain(){
         setBreadcrumb([]);
         document.getElementById('titulo-pagina').textContent = 'Selecione uma opção ao lado';
-        document.getElementById('corpo-pagina').textContent = 'Passe o mouse ou clique nas opções à esquerda para ver o conteúdo correspondente.';
+        document.getElementById('corpo-pagina').textContent = 'Clique nas opções à esquerda para ver o conteúdo correspondente.';
         document.getElementById('proposal-preview').innerHTML = '';
         document.getElementById('staff-area').innerHTML = '';
       }
@@ -241,6 +242,25 @@
         var corpo = document.getElementById('corpo-pagina'); corpo.innerHTML = ''; corpo.appendChild(table);
       }
 
+      // Important: updated ajustarEstoque to re-render the correct view after change
+      function ajustarEstoque(id, valor){
+        var item = estoque.find(function(i){ return i.id===id; });
+        if(!item) return;
+        item.qtd = Math.max(0, item.qtd + valor);
+        localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
+        // re-render current view appropriately
+        if(catAtual && setorAtual){
+          if(catAtual === 'Freezer'){
+            // setorAtual stores the freezer local in this flow
+            abrirFreezer(setorAtual);
+          } else {
+            abrirSetor(setorAtual);
+          }
+        } else {
+          renderizar();
+        }
+      }
+
       function renderProposalEditor(tipo){
         currentProposal = { tipo: tipo, nivel: null, selections: [] };
         setBreadcrumb([{text:'Início', action:function(){ currentProposal=null; showDefaultMain(); }}, {text:'Proposta: ' + tipo}]);
@@ -260,7 +280,7 @@
         var cancel = document.createElement('button'); cancel.className='btn ghost'; cancel.textContent='Cancelar'; cancel.addEventListener('click', function(){ currentProposal=null; document.getElementById('proposal-preview').innerHTML=''; showDefaultMain(); });
         actions.appendChild(confirm); actions.appendChild(cancel);
         container.appendChild(actions);
-        var corpo = document.getElementById('corpo-pagina'); corpo.innerHTML=''; corpo.appendChild(container);
+        var corpo = document.getElementById('corpo-pagina'); corpo.innerHTML = ''; corpo.appendChild(container);
       }
 
       function selectPackage(nivel){
@@ -370,7 +390,8 @@
         flex.appendChild(right);
         div.appendChild(flex);
         var lastDiv = document.createElement('div'); lastDiv.style.marginTop='10px'; lastDiv.innerHTML = '<strong>Última Proposta (detalhes de origem)</strong>';
-        if(lastProposal){ lastDiv.innerHTML += '<div style="font-size:0.9rem;margin-top:6px"><em>' + new Date(lastProposal.timestamp).toLocaleString() + '</em></div>'; if(lastProposal.allocations.length){ Object.keys(lastProposal.allocations.reduce(function(acc,a){ acc[a.nome]=true; return acc; },{})).forEach(function(nome){ lastDiv.innerHTML += '<div style="margin-top:6px"><strong>' + escapeHtml(nome) + '</strong></div>'; }); if(lastProposal.shortages.length){ lastDiv.innerHTML += '<div style="margin-top:8px;color:#b91c1c"><strong>Faltas:</strong><ul>'; lastProposal.shortages.forEach(function(s){ lastDiv.innerHTML += '<li>' + escapeHtml(s.nome) + ' — falta ' + s.need + '</li>'; }); lastDiv.innerHTML += '</ul></div>'; } if(lastProposal.equipIssues && lastProposal.equipIssues.length){ lastDiv.innerHTML += '<div style="margin-top:8px;color:#92400e"><strong>Equipamentos indisponíveis:</strong><ul>'; lastProposal.equipIssues.forEach(function(e){ lastDiv.innerHTML += '<li>' + escapeHtml(e.nome) + ' — ' + escapeHtml(e.onde) + '</li>'; }); lastDiv.innerHTML += '</ul></div>'; } } else lastDiv.innerHTML += '<div style="margin-top:6px"><em>Nenhuma alocação.</em></div>'; } else lastDiv.innerHTML += '<div style="margin-top:6px"><em>Nenhuma proposta registrada ainda.</em></div>'; div.appendChild(lastDiv); div.innerHTML += '<div style="margin-top:10px"><small>Última atualização: ' + new Date().toLocaleString() + '</small></div>';
+        if(lastProposal){ lastDiv.innerHTML += '<div style="font-size:0.9rem;margin-top:6px"><em>' + new Date(lastProposal.timestamp).toLocaleString() + '</em></div>'; if(lastProposal.allocations.length){ Object.keys(lastProposal.allocations.reduce(function(acc,a){ acc[a.nome]=true; return acc; },{})).forEach(function(nome){ lastDiv.innerHTML += '<div style="margin-top:6px"><strong>' + escapeHtml(nome) + '</strong></div>'; }); if(lastProposal.shortages.length){ lastDiv.innerHTML += '<div style="margin-top:8px;color:#b91c1c"><strong>Faltas:</strong><ul>'; lastProposal.shortages.forEach(function(s){ lastDiv.innerHTML += '<li>' + escapeHtml(s.nome) + ' — falta ' + s.need + '</li>'; }); lastDiv.innerHTML += '</ul></div>'; } if(lastProposal.equipIssues && lastProposal.equipIssues.length){ lastDiv.innerHTML += '<div style="margin-top:8px;color:#92400e"><strong>Equipamentos indisponíveis:</strong><ul>'; lastProposal.equipIssues.forEach(function(e){ lastDiv.innerHTML += '<li>' + escapeHtml(e.nome) + ' — ' + escapeHtml(e.onde) + '</li>'; }); lastDiv.innerHTML += '</ul></div>'; } } else lastDiv.innerHTML += '<div style="margin-top:6px"><em>Nenhuma alocação.</em></div>'; } else lastDiv.innerHTML += '<div style="margin-top:6px"><em>Nenhuma proposta registrada ainda.</em></div>';
+        div.appendChild(lastDiv); div.innerHTML += '<div style="margin-top:10px"><small>Última atualização: ' + new Date().toLocaleString() + '</small></div>';
         staff.appendChild(div);
         document.getElementById('save-phone').addEventListener('click', saveStaffPhone);
         document.getElementById('send-last').addEventListener('click', sendLastProposalWhatsApp);
@@ -379,37 +400,16 @@
 
       function saveStaffPhone(){ var el = document.getElementById('staff-phone'); if(!el) return; var v = (el.value||'').trim(); if(!v){ alert('Informe o telefone no formato internacional sem sinais (ex: 5511999999999)'); return; } localStorage.setItem('staff_phone', v); alert('Número do staff salvo.'); }
       function sendLastProposalWhatsApp(){ var staffPhone = localStorage.getItem('staff_phone') || ''; if(!staffPhone){ alert('Configure primeiro o número do staff.'); return; } var lastProposal = JSON.parse(localStorage.getItem('last_proposal') || 'null'); if(!lastProposal){ alert('Não há proposta para enviar.'); return; } var msg = buildWhatsAppMessage(lastProposal); window.open('https://wa.me/' + encodeURIComponent(staffPhone) + '?text=' + encodeURIComponent(msg), '_blank'); }
+
       function printProposal(){ var el = document.getElementById('proposal-card'); if(!el) return alert('Nenhuma proposta para imprimir.'); var w = window.open('','_blank'); w.document.write('<html><head><title>Proposta</title></head><body>'); w.document.write(el.outerHTML); w.document.write('</body></html>'); w.document.close(); w.print(); }
       window.exportProposalPNG = function(){ var el = document.getElementById('proposal-card'); if(!el) return alert('Nenhuma proposta para exportar.'); html2canvas(el, { scale:2 }).then(function(canvas){ var url = canvas.toDataURL('image/png'); var a = document.createElement('a'); a.href = url; a.download = 'proposta_buffet_rio.png'; a.click(); }).catch(function(){ alert('Erro ao gerar imagem.'); }); };
 
-      function ajustarEstoque(id, valor){ var item = estoque.find(function(i){ return i.id===id; }); if(!item) return; item.qtd = Math.max(0, item.qtd + valor); localStorage.setItem('buffet_rio_db', JSON.stringify(estoque)); if(catAtual){ if(catAtual==='Freezer') renderCategoria(catAtual); else renderCategoria(catAtual); } else renderizar(); }
       function renderizar(){ if(catAtual) renderCategoria(catAtual); else showDefaultMain(); }
 
-      // hover preview logic (show small card on hover)
-      var hoverPreview = document.getElementById('hover-preview');
-      document.querySelectorAll('.btn-menu').forEach(function(btn){
-        btn.addEventListener('mouseenter', function(){
-          var type = btn.getAttribute('data-type'), key = btn.getAttribute('data-key');
-          hoverPreview.style.display = 'block'; hoverPreview.innerHTML = '';
-          var rect = btn.getBoundingClientRect();
-          var card = document.createElement('div'); card.className='hover-card';
-          if(type==='categoria'){
-            if(key==='Freezer'){ var freezers=[]; estoque.forEach(function(i){ if(i.cat==='Freezer' && freezers.indexOf(i.local)===-1) freezers.push(i.local); }); var html = '<strong>' + escapeHtml(key) + '</strong><div style="margin-top:8px">Freezers disponíveis:</div><ul>'; freezers.forEach(function(f){ html += '<li>' + escapeHtml(f) + ' — ' + estoque.filter(function(p){ return p.local===f; }).reduce(function(s,p){ return s + p.qtd; },0) + '</li>'; }); html += '</ul>'; card.innerHTML = html; }
-            else { var setores = []; estoque.forEach(function(i){ if(i.cat===key && setores.indexOf(i.setor)===-1) setores.push(i.setor); }); var html2 = '<strong>' + escapeHtml(key) + '</strong><div style="margin-top:8px">Setores:</div><ul>'; setores.slice(0,5).forEach(function(s){ html2 += '<li>' + escapeHtml(s) + ' — ' + estoque.filter(function(p){ return p.setor===s; }).reduce(function(su,p){ return su + p.qtd; },0) + '</li>'; }); html2 += '</ul>'; card.innerHTML = html2; }
-          } else if(type==='proposta'){ var niveles = Object.keys(propostas[key]||{}); card.innerHTML = '<strong>Proposta: ' + escapeHtml(key) + '</strong><div style="margin-top:8px">Níveis: ' + niveles.join(', ') + '</div>'; }
-          else card.innerHTML = '<strong>Painel do Staff</strong><div style="margin-top:8px">Ver lista de compras, equipamentos e última proposta.</div>';
-          hoverPreview.appendChild(card);
-          hoverPreview.style.left = (rect.right + 10) + 'px';
-          hoverPreview.style.top = (rect.top) + 'px';
-        });
-      });
-      document.getElementById('left-nav').addEventListener('mouseleave', function(){ hoverPreview.style.display='none'; hoverPreview.innerHTML=''; });
-
-      // click delegation for left menu
+      // left menu click delegation (no hover preview)
       document.getElementById('left-nav').addEventListener('click', function(e){
         var btn = e.target.closest('.btn-menu'); if(!btn) return;
         var type = btn.getAttribute('data-type'), key = btn.getAttribute('data-key');
-        hoverPreview.style.display='none'; hoverPreview.innerHTML='';
         if(type==='categoria') renderCategoria(key);
         else if(type==='proposta') renderProposalEditor(key);
         else if(type==='admin') renderStaffPanel(true);
@@ -419,15 +419,14 @@
       showDefaultMain();
       renderizar();
 
-      // expose some functions for debugging
+      // expose minimal API for debugging from console
       window.app = { renderizar: renderizar, renderCategoria: renderCategoria, estoque: estoque };
     } catch(err) {
       console.error('Execution error in app script:', err);
-      // show minimal friendly error and fallback UI
       document.getElementById('titulo-pagina').textContent = 'Ocorreu um erro ao carregar a aplicação';
       document.getElementById('corpo-pagina').textContent = 'Abra o Console (F12) para ver detalhes. Se o erro persistir, limpe o cache e desregistre qualquer Service Worker.';
     }
-  }); // end DOMContentLoaded
+  }); // DOMContentLoaded end
   </script>
 </body>
 </html>
