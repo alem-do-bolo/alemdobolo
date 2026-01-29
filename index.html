@@ -5,551 +5,429 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Gestão de Buffet Rio - Além do Bolo</title>
   <style>
-    :root { --primaria:#0f172a; --destaque:#10b981; --fundo:#f8fafc; --borda:#e2e8f0; }
-    body { font-family: 'Segoe UI', sans-serif; margin:0; display:flex; background:var(--fundo); color:#334155; }
-    nav { width:320px; background:var(--primaria); height:100vh; position:fixed; padding:18px; color:white; box-shadow:4px 0 10px rgba(0,0,0,.12); overflow:auto; }
-    nav h2 { font-size:1.1rem; color:var(--destaque); margin-bottom:12px; border-bottom:1px solid #1e293b; padding-bottom:10px; }
-    .label-grupo { font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin:12px 0 6px; }
-    .btn-menu { width:100%; padding:10px; margin-bottom:8px; background:#1e293b; border:none; color:white; text-align:left; border-radius:6px; cursor:pointer; transition:.2s; }
-    .btn-menu:hover { background:rgba(16,185,129,0.12); color:var(--destaque); font-weight:600; }
-    main { margin-left:360px; padding:28px; width:100%; min-height:100vh; }
-    .card { background:white; padding:22px; border-radius:10px; border:1px solid var(--borda); box-shadow:0 4px 6px -1px rgba(0,0,0,.06); }
-    .caminho { margin-bottom:16px; font-size:.9rem; color:#64748b; cursor:pointer; }
-    .caminho span:hover { color:var(--destaque); text-decoration:underline; }
-    table { width:100%; border-collapse:collapse; margin-top:12px; }
-    th { text-align:left; padding:12px; background:#f1f5f9; color:#475569; font-size:.85rem; }
-    td { padding:12px; border-bottom:1px solid var(--borda); }
-    .linha-clicavel { cursor:pointer; transition:.2s; }
-    .linha-clicavel:hover { background:#f8fafc; }
-    .btn-qtd { padding:6px 10px; border:1px solid var(--borda); background:white; cursor:pointer; border-radius:4px; }
-    .alerta { color:#ef4444; font-weight:bold; }
-    .packages { display:flex; gap:12px; margin-top:14px; }
-    .pkg { padding:12px; border-radius:8px; background:#f8fafc; border:1px solid var(--borda); cursor:pointer; flex:1; text-align:center; }
-    .pkg.active { background:var(--destaque); color:white; font-weight:700; }
-    .items-list { margin-top:14px; }
-    .item-row { display:flex; gap:12px; align-items:center; padding:8px; border-bottom:1px dashed var(--borda); }
-    .item-row input[type="number"] { width:70px; padding:6px; border:1px solid var(--borda); border-radius:6px; }
-    .actions { margin-top:14px; display:flex; gap:8px; }
-    .btn { padding:10px 14px; border-radius:8px; border:none; cursor:pointer; }
-    .btn.primary { background:var(--destaque); color:white; }
-    .btn.ghost { background:white; border:1px solid var(--borda); }
-    #proposal-preview { margin-top:18px; }
-    .proposal-card { width:700px; padding:22px; border-radius:10px; background:linear-gradient(180deg,#ffffff, #f9fafb); color:#0f172a; box-shadow:0 10px 30px rgba(2,6,23,.12); }
-    .proposal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-    .proposal-items { margin-top:8px; }
-    .staff-panel { margin-top:18px; padding:12px; background:#fff7ed; border-radius:8px; border:1px solid #fde3c6; }
-    .note { font-size:.9rem; color:#7b341e; }
-    input.small { width:100%; padding:6px; border:1px solid var(--borda); border-radius:6px; }
-    /* hover-preview area */
-    #hover-preview { position:fixed; left:360px; top:28px; width:calc(100% - 400px); pointer-events:none; z-index:5; }
-    .hover-card { pointer-events:auto; background:white; border-radius:8px; padding:12px; border:1px solid var(--borda); box-shadow:0 6px 18px rgba(2,6,23,.08); }
+    :root{--primaria:#0f172a;--destaque:#10b981;--fundo:#f8fafc;--borda:#e2e8f0}
+    body{font-family:'Segoe UI',sans-serif;margin:0;display:flex;background:var(--fundo);color:#334155}
+    nav{width:320px;background:var(--primaria);height:100vh;position:fixed;padding:18px;color:white;box-shadow:4px 0 10px rgba(0,0,0,.12);overflow:auto}
+    nav h2{font-size:1.1rem;color:var(--destaque);margin-bottom:12px;border-bottom:1px solid #1e293b;padding-bottom:10px}
+    .label-grupo{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:12px 0 6px}
+    .btn-menu{width:100%;padding:10px;margin-bottom:8px;background:#1e293b;border:0;color:white;text-align:left;border-radius:6px;cursor:pointer;transition:.2s}
+    .btn-menu:hover{background:rgba(16,185,129,0.12);color:var(--destaque);font-weight:600}
+    main{margin-left:360px;padding:28px;width:100%;min-height:100vh}
+    .card{background:white;padding:22px;border-radius:10px;border:1px solid var(--borda);box-shadow:0 4px 6px -1px rgba(0,0,0,.06)}
+    .caminho{margin-bottom:16px;font-size:.9rem;color:#64748b}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th{text-align:left;padding:12px;background:#f1f5f9;color:#475569;font-size:.85rem}
+    td{padding:12px;border-bottom:1px solid var(--borda)}
+    .linha-clicavel{cursor:pointer;transition:.2s}
+    .linha-clicavel:hover{background:#f8fafc}
+    .btn-qtd{padding:6px 10px;border:1px solid var(--borda);background:white;cursor:pointer;border-radius:4px}
+    .alerta{color:#ef4444;font-weight:bold}
+    .packages{display:flex;gap:12px;margin-top:14px}
+    .pkg{padding:12px;border-radius:8px;background:#f8fafc;border:1px solid var(--borda);cursor:pointer;flex:1;text-align:center}
+    .pkg.active{background:var(--destaque);color:white;font-weight:700}
+    .items-list{margin-top:14px}
+    .item-row{display:flex;gap:12px;align-items:center;padding:8px;border-bottom:1px dashed var(--borda)}
+    .actions{margin-top:14px;display:flex;gap:8px}
+    .btn{padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+    .btn.primary{background:var(--destaque);color:white}
+    .btn.ghost{background:white;border:1px solid var(--borda)}
+    #proposal-preview{margin-top:18px}
+    .proposal-card{width:700px;padding:22px;border-radius:10px;background:linear-gradient(180deg,#fff,#f9fafb);color:#0f172a;box-shadow:0 10px 30px rgba(2,6,23,.12)}
+    .hover-card{pointer-events:auto;background:white;border-radius:8px;padding:12px;border:1px solid var(--borda);box-shadow:0 6px 18px rgba(2,6,23,.08)}
+    .note{font-size:.9rem;color:#7b341e}
+    input.small{width:100%;padding:6px;border:1px solid var(--borda);border-radius:6px}
+    #hover-preview{position:fixed;left:360px;top:28px;width:calc(100% - 400px);pointer-events:none;z-index:5;display:none}
   </style>
+  <script>
+    // Early: unregister any old service worker to avoid "Content unavailable. Resource was not cached"
+    if ('serviceWorker' in navigator) {
+      try {
+        navigator.serviceWorker.getRegistrations().then(function(regs){
+          regs.forEach(function(r){ try{ r.unregister(); }catch(e){} });
+        }).catch(function(){});
+        // also attempt single registration removal
+        navigator.serviceWorker.getRegistration().then(function(r){ if(r) try{ r.unregister(); }catch(e){} }).catch(function(){});
+      } catch(e) {
+        // fail silently
+        console.warn('SW unregister early failed', e);
+      }
+    }
+  </script>
 </head>
 <body>
+  <nav id="left-nav">
+    <h2>BUFFET RIO PRO</h2>
+    <div class="label-grupo">Armazenamento</div>
+    <button class="btn-menu" data-type="categoria" data-key="Câmara">📦 Itens de Câmara</button>
+    <button class="btn-menu" data-type="categoria" data-key="Freezer">❄️ Itens de Freezer</button>
+    <div class="label-grupo">Operacional</div>
+    <button class="btn-menu" data-type="categoria" data-key="Equipamento">⚡ Equipamentos</button>
+    <button class="btn-menu" data-type="categoria" data-key="Material">🍽️ Materiais / Louças</button>
+    <div class="label-grupo">Comercial - Propostas</div>
+    <button class="btn-menu" data-type="proposta" data-key="Café Manhã">☕ Café Manhã</button>
+    <button class="btn-menu" data-type="proposta" data-key="Coffee Meal">🥪 Coffee Meal</button>
+    <button class="btn-menu" data-type="proposta" data-key="Almoço">🍛 Almoço</button>
+    <button class="btn-menu" data-type="proposta" data-key="Janta">🍽️ Janta</button>
+    <button class="btn-menu" data-type="proposta" data-key="Coquetelaria">🍸 Coquetelaria</button>
+    <div class="label-grupo" style="margin-top:12px">Admin</div>
+    <button class="btn-menu" data-type="admin" data-key="staff">🛟 Painel do Staff</button>
+  </nav>
 
-<nav id="left-nav">
-  <h2>BUFFET RIO PRO</h2>
+  <main>
+    <div id="navegacao" class="caminho"></div>
+    <div class="card" id="main-card">
+      <h1 id="titulo-pagina">Selecione uma opção ao lado</h1>
+      <div id="corpo-pagina">Passe o mouse ou clique nas opções à esquerda para ver o conteúdo correspondente.</div>
+    </div>
+    <div id="proposal-preview"></div>
+    <div id="staff-area"></div>
+  </main>
 
-  <div class="label-grupo">Armazenamento</div>
-  <button class="btn-menu" data-type="categoria" data-key="Câmara">📦 Itens de Câmara</button>
-  <button class="btn-menu" data-type="categoria" data-key="Freezer">❄️ Itens de Freezer</button>
+  <div id="hover-preview"></div>
 
-  <div class="label-grupo">Operacional</div>
-  <button class="btn-menu" data-type="categoria" data-key="Equipamento">⚡ Equipamentos</button>
-  <button class="btn-menu" data-type="categoria" data-key="Material">🍽️ Materiais / Louças</button>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script>
+  // Encapsular todo el JS en DOMContentLoaded y captura de errores
+  document.addEventListener('DOMContentLoaded', function(){
+    try {
+      // datos iniciales en localStorage (si no existen)
+      var estoque = JSON.parse(localStorage.getItem('buffet_rio_db')) || [
+        { id:1, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante A", nome:"Carne Bovina", qtd:25, min:10, info:"-2°C", tipo:"ingrediente" },
+        { id:2, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante B", nome:"Laticínios", qtd:8, min:15, info:"Validade curta", tipo:"ingrediente" },
+        { id:3, cat:"Freezer", local:"Freezer Vertical 1", setor:"Gaveta 1 - F1", nome:"Polpas de Fruta", qtd:40, min:10, info:"Freezer 1", tipo:"ingrediente" },
+        { id:6, cat:"Freezer", local:"Freezer Horizontal 2", setor:"Gaveta 1 - F2", nome:"Polpas de Fruta (F2)", qtd:20, min:10, info:"Freezer 2", tipo:"ingrediente" },
+        { id:4, cat:"Equipamento", local:"Cozinha Central", setor:"Bancada", nome:"Fritadeira Elétrica", qtd:2, min:1, info:"Voltagem:220V", tipo:"equipamento" },
+        { id:5, cat:"Material", local:"Depósito", setor:"Prateleira 4", nome:"Pratos Rasos", qtd:150, min:100, info:"Porcelana Branca", tipo:"material" }
+      ];
+      localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
+      var equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || { 4:{status:"em evento",onde:"Casamento - Praia"} };
+      localStorage.setItem('equip_status', JSON.stringify(equipamentosStatus));
 
-  <div class="label-grupo">Comercial - Propostas</div>
-  <button class="btn-menu" data-type="proposta" data-key="Café Manhã">☕ Café Manhã</button>
-  <button class="btn-menu" data-type="proposta" data-key="Coffee Meal">🥪 Coffee Meal</button>
-  <button class="btn-menu" data-type="proposta" data-key="Almoço">🍛 Almoço</button>
-  <button class="btn-menu" data-type="proposta" data-key="Janta">🍽️ Janta</button>
-  <button class="btn-menu" data-type="proposta" data-key="Coquetelaria">🍸 Coquetelaria</button>
+      // estado UI
+      var catAtual = '';
+      var setorAtual = '';
+      var currentProposal = null;
 
-  <div class="label-grupo" style="margin-top:12px">Admin</div>
-  <button class="btn-menu" data-type="admin" data-key="staff">🛟 Painel do Staff</button>
-</nav>
+      // propuestas
+      var propostas = {
+        "Café Manhã": { "Básico":[{id:5,qty:30},{id:3,qty:10}], "Top":[{id:5,qty:50},{id:3,qty:20},{id:2,qty:10}], "Premium":[{id:5,qty:80},{id:3,qty:30},{id:2,qty:20},{id:1,qty:10}] },
+        "Coffee Meal": { "Básico":[{id:5,qty:20},{id:3,qty:15}], "Top":[{id:5,qty:40},{id:3,qty:30},{id:2,qty:10}], "Premium":[{id:5,qty:60},{id:3,qty:40},{id:2,qty:20},{id:1,qty:15}] },
+        "Almoço": { "Básico":[{id:1,qty:10},{id:5,qty:40}], "Top":[{id:1,qty:20},{id:5,qty:60},{id:3,qty:20}], "Premium":[{id:1,qty:35},{id:5,qty:80},{id:3,qty:30}] },
+        "Janta": { "Básico":[{id:1,qty:12},{id:5,qty:40}], "Top":[{id:1,qty:25},{id:5,qty:70},{id:3,qty:25}], "Premium":[{id:1,qty:40},{id:5,qty:100},{id:3,qty:40}] },
+        "Coquetelaria": { "Básico":[{id:5,qty:20},{id:3,qty:10}], "Top":[{id:5,qty:40},{id:3,qty:20}], "Premium":[{id:5,qty:60},{id:3,qty:40},{id:4,qty:1}] }
+      };
 
-<main>
-  <div id="navegacao" class="caminho"></div>
+      // helpers seguros
+      function escapeHtml(s){ if(s===undefined || s===null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+      function baseName(nome){ return String(nome).replace(/\s*\(.*\)\s*/g,'').trim().toLowerCase(); }
+      function totalAvailableFor(id){ var prod = estoque.find(function(p){ return p.id===id; }); if(!prod) return 0; var base = baseName(prod.nome); return estoque.filter(function(p){ return baseName(p.nome)===base; }).reduce(function(s,p){ return s + p.qtd; },0); }
 
-  <div class="card" id="main-card">
-    <h1 id="titulo-pagina">Selecione uma opção ao lado</h1>
-    <div id="corpo-pagina">Escolha uma categoria para gerenciar o estoque ou criar uma proposta.</div>
-  </div>
+      function reserveAcrossLocationsProportional(id, qty){
+        var main = estoque.find(function(p){ return p.id===id; });
+        if(!main) return { allocations:[], shortage:qty };
+        var base = baseName(main.nome);
+        var candidates = estoque.filter(function(p){ return baseName(p.nome)===base && p.qtd>0; });
+        var totalAvailable = candidates.reduce(function(s,c){ return s + c.qtd; }, 0);
+        if(totalAvailable <= 0) return { allocations:[], shortage:qty };
+        var provisional = candidates.map(function(c){ return { c:c, take:0 }; });
+        var allocatedSum = 0;
+        provisional.forEach(function(p){
+          var share = Math.floor(qty * (p.c.qtd / totalAvailable));
+          var take = Math.min(share, p.c.qtd);
+          p.take = take;
+          allocatedSum += take;
+        });
+        var remaining = qty - allocatedSum;
+        provisional.sort(function(a,b){ return (b.c.qtd - a.c.qtd) - (a.c.qtd - b.c.qtd); });
+        for(var i=0;i<provisional.length && remaining>0;i++){
+          var p = provisional[i];
+          var can = Math.min(remaining, p.c.qtd - p.take);
+          if(can>0){ p.take += can; remaining -= can; }
+        }
+        if(remaining>0){
+          for(i=0;i<provisional.length && remaining>0;i++){
+            var p2 = provisional[i];
+            var can2 = Math.min(remaining, p2.c.qtd - p2.take);
+            if(can2>0){ p2.take += can2; remaining -= can2; }
+          }
+        }
+        var allocations = [];
+        provisional.forEach(function(p){
+          if(p.take>0){ p.c.qtd -= p.take; allocations.push({ id:p.c.id, nome:p.c.nome, local:p.c.local, reserved:p.take }); }
+        });
+        var shortage = Math.max(0, qty - allocations.reduce(function(s,a){ return s + a.reserved; },0));
+        return { allocations: allocations, shortage: shortage };
+      }
 
-  <div id="proposal-preview"></div>
-  <div id="staff-area"></div>
-</main>
+      // UI helpers: breadcrumbs / renderers (creación de nodos para evitar errores de string)
+      function setBreadcrumb(parts){
+        var nav = document.getElementById('navegacao'); nav.innerHTML = '';
+        parts.forEach(function(p,i){
+          var span = document.createElement('span'); span.textContent = p.text;
+          if(p.action){ span.style.cursor = 'pointer'; span.addEventListener('click', p.action); }
+          nav.appendChild(span);
+          if(i < parts.length-1) nav.appendChild(document.createTextNode(' > '));
+        });
+      }
 
-<!-- small hover preview container -->
-<div id="hover-preview" style="display:none"></div>
+      function showDefaultMain(){
+        setBreadcrumb([]);
+        document.getElementById('titulo-pagina').textContent = 'Selecione uma opção ao lado';
+        document.getElementById('corpo-pagina').textContent = 'Passe o mouse ou clique nas opções à esquerda para ver o conteúdo correspondente.';
+        document.getElementById('proposal-preview').innerHTML = '';
+        document.getElementById('staff-area').innerHTML = '';
+      }
 
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script>
-/* --- Dados e estado (localStorage) --- */
-let estoque = JSON.parse(localStorage.getItem('buffet_rio_db')) || [
-  { id:1, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante A", nome:"Carne Bovina", qtd:25, min:10, info:"-2°C", tipo:"ingrediente" },
-  { id:2, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante B", nome:"Laticínios", qtd:8, min:15, info:"Validade curta", tipo:"ingrediente" },
-  { id:3, cat:"Freezer", local:"Freezer Vertical 1", setor:"Gaveta 1 - F1", nome:"Polpas de Fruta", qtd:40, min:10, info:"Freezer 1", tipo:"ingrediente" },
-  { id:6, cat:"Freezer", local:"Freezer Horizontal 2", setor:"Gaveta 1 - F2", nome:"Polpas de Fruta (F2)", qtd:20, min:10, info:"Freezer 2", tipo:"ingrediente" },
-  { id:4, cat:"Equipamento", local:"Cozinha Central", setor:"Bancada", nome:"Fritadeira Elétrica", qtd:2, min:1, info:"Voltagem:220V", tipo:"equipamento" },
-  { id:5, cat:"Material", local:"Depósito", setor:"Prateleira 4", nome:"Pratos Rasos", qtd:150, min:100, info:"Porcelana Branca", tipo:"material" }
-];
-localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
-let equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || { 4: { status: "em evento", onde: "Casamento - Praia" } };
-localStorage.setItem('equip_status', JSON.stringify(equipamentosStatus));
+      function renderCategoria(cat){
+        catAtual = cat; setorAtual = '';
+        if(cat === 'Freezer'){
+          var freezers = [];
+          estoque.forEach(function(i){ if(i.cat==='Freezer' && freezers.indexOf(i.local)===-1) freezers.push(i.local); });
+          setBreadcrumb([{text:'Início', action:function(){ catAtual=''; showDefaultMain(); }}, {text:cat}]);
+          document.getElementById('titulo-pagina').textContent = 'Freezers';
+          var tbl = document.createElement('table');
+          tbl.innerHTML = '<thead><tr><th>Freezer</th><th>Qtd Total</th></tr></thead><tbody></tbody>';
+          freezers.forEach(function(f){
+            var total = estoque.filter(function(p){ return p.local===f; }).reduce(function(s,p){ return s + p.qtd; },0);
+            var tr = document.createElement('tr'); tr.className = 'linha-clicavel';
+            tr.innerHTML = '<td>❄️ <b>' + escapeHtml(f) + '</b></td><td>' + total + '</td>';
+            tr.addEventListener('click', function(){ abrirFreezer(f); });
+            tbl.querySelector('tbody').appendChild(tr);
+          });
+          var corpo = document.getElementById('corpo-pagina'); corpo.innerHTML = ''; corpo.appendChild(tbl);
+        } else {
+          setBreadcrumb([{text:'Início', action:function(){ catAtual=''; showDefaultMain(); }}, {text:cat}]);
+          document.getElementById('titulo-pagina').textContent = 'Setores da ' + cat;
+          var setores = []; estoque.forEach(function(i){ if(i.cat===cat && setores.indexOf(i.setor)===-1) setores.push(i.setor); });
+          var table = document.createElement('table'); table.innerHTML = '<thead><tr><th>Setor / Localização</th><th>Qtd Total</th></tr></thead><tbody></tbody>';
+          setores.forEach(function(s){
+            var total = estoque.filter(function(i){ return i.cat===cat && i.setor===s; }).reduce(function(a,b){ return a + b.qtd; },0);
+            var tr = document.createElement('tr'); tr.className = 'linha-clicavel';
+            tr.innerHTML = '<td>📂 Setor: <b>' + escapeHtml(s) + '</b></td><td>' + total + '</td>';
+            tr.addEventListener('click', function(){ abrirSetor(s); });
+            table.querySelector('tbody').appendChild(tr);
+          });
+          var corpo = document.getElementById('corpo-pagina'); corpo.innerHTML = ''; corpo.appendChild(table);
+        }
+      }
 
-let catAtual = "";
-let setorAtual = "";
-let currentProposal = null;
+      function abrirFreezer(local){
+        setorAtual = local; catAtual = 'Freezer';
+        setBreadcrumb([{text:'Início', action:function(){ catAtual=''; showDefaultMain(); }},{text:catAtual, action:function(){ renderCategoria(catAtual); }},{text:setorAtual}]);
+        document.getElementById('titulo-pagina').textContent = 'Itens em: ' + setorAtual;
+        var itens = estoque.filter(function(i){ return i.cat==='Freezer' && i.local===local; });
+        renderItemsTable(itens);
+      }
 
-/* Propostas (Básico / Top / Premium) */
-const propostas = {
-  "Café Manhã": { "Básico": [{id:5, qty:30}, {id:3, qty:10}], "Top": [{id:5, qty:50}, {id:3, qty:20}, {id:2, qty:10}], "Premium": [{id:5, qty:80}, {id:3, qty:30}, {id:2, qty:20}, {id:1, qty:10}] },
-  "Coffee Meal": { "Básico":[{id:5, qty:20}, {id:3, qty:15}], "Top":[{id:5, qty:40}, {id:3, qty:30}, {id:2, qty:10}], "Premium":[{id:5, qty:60}, {id:3, qty:40}, {id:2, qty:20}, {id:1, qty:15}] },
-  "Almoço": { "Básico":[{id:1,qty:10},{id:5,qty:40}], "Top":[{id:1,qty:20},{id:5,qty:60},{id:3,qty:20}], "Premium":[{id:1,qty:35},{id:5,qty:80},{id:3,qty:30}] },
-  "Janta": { "Básico":[{id:1,qty:12},{id:5,qty:40}], "Top":[{id:1,qty:25},{id:5,qty:70},{id:3,qty:25}], "Premium":[{id:1,qty:40},{id:5,qty:100},{id:3,qty:40}] },
-  "Coquetelaria": { "Básico":[{id:5,qty:20},{id:3,qty:10}], "Top":[{id:5,qty:40},{id:3,qty:20}], "Premium":[{id:5,qty:60},{id:3,qty:40},{id:4,qty:1}] }
-};
+      function abrirSetor(s){
+        setorAtual = s;
+        setBreadcrumb([{text:'Início', action:function(){ catAtual=''; showDefaultMain(); }},{text:catAtual, action:function(){ renderCategoria(catAtual); }},{text:setorAtual}]);
+        document.getElementById('titulo-pagina').textContent = 'Itens em: ' + setorAtual;
+        var itens = estoque.filter(function(i){ return i.cat===catAtual && i.setor===setorAtual; });
+        renderItemsTable(itens);
+      }
 
-/* ---------- Utilidades de reserva (proporcional) ---------- */
-function baseName(nome){ return nome.replace(/\s*\(.*\)\s*/g,'').trim().toLowerCase(); }
-function totalAvailableFor(id){ const prod = estoque.find(p=>p.id===id); if(!prod) return 0; const base=baseName(prod.nome); return estoque.filter(p=>baseName(p.nome)===base).reduce((s,p)=>s+p.qtd,0); }
-function reserveAcrossLocationsProportional(id, qty){
-  const main = estoque.find(p=>p.id===id); if(!main) return { allocations:[], shortage:qty };
-  const base = baseName(main.nome);
-  const candidates = estoque.filter(p=>baseName(p.nome)===base && p.qtd>0);
-  const totalAvailable = candidates.reduce((s,c)=>s+c.qtd,0);
-  if(totalAvailable<=0) return { allocations:[], shortage:qty };
-  let provisional = candidates.map(c=>({ c, take:0 }));
-  // initial floor proportional
-  let allocatedSum=0;
-  provisional.forEach(p=>{
-    const share = Math.floor(qty * (p.c.qtd/totalAvailable));
-    const take = Math.min(share, p.c.qtd);
-    p.take = take;
-    allocatedSum += take;
-  });
-  let remaining = qty - allocatedSum;
-  // distribute remaining to candidates sorted by remaining capacity desc
-  provisional.sort((a,b)=> (b.c.qtd - a.c.qtd) - (a.c.qtd - b.c.qtd));
-  for(const p of provisional){
-    if(remaining<=0) break;
-    const can = Math.min(remaining, p.c.qtd - p.take);
-    if(can>0){ p.take += can; remaining -= can; }
-  }
-  // final attempt if still remaining
-  if(remaining>0) for(const p of provisional){
-    if(remaining<=0) break;
-    const can = Math.min(remaining, p.c.qtd - p.take);
-    if(can>0){ p.take += can; remaining -= can; }
-  }
-  // apply and collect allocations
-  const allocations = [];
-  provisional.forEach(p=>{
-    if(p.take>0){
-      p.c.qtd -= p.take;
-      allocations.push({ id:p.c.id, nome:p.c.nome, local:p.c.local, reserved:p.take });
-    }
-  });
-  const shortage = Math.max(0, qty - allocations.reduce((s,a)=>s+a.reserved,0));
-  return { allocations, shortage };
-}
+      function renderItemsTable(itens){
+        var table = document.createElement('table'); table.innerHTML = '<thead><tr><th>Item</th><th>Qtd</th><th>Info Técnica</th><th>Movimentação</th></tr></thead><tbody></tbody>';
+        itens.forEach(function(p){
+          var tr = document.createElement('tr');
+          tr.innerHTML = '<td><b>' + escapeHtml(p.nome) + '</b></td><td class="' + (p.qtd<=p.min ? 'alerta' : '') + '">' + p.qtd + '</td><td><small>' + escapeHtml(p.info||'-') + '</small></td><td></td>';
+          var tdActions = tr.querySelector('td:last-child');
+          var bInc = document.createElement('button'); bInc.className='btn-qtd'; bInc.textContent = '+'; bInc.addEventListener('click', function(){ ajustarEstoque(p.id,1); });
+          var bDec = document.createElement('button'); bDec.className='btn-qtd'; bDec.textContent='-'; bDec.addEventListener('click', function(){ ajustarEstoque(p.id,-1); });
+          tdActions.appendChild(bInc); tdActions.appendChild(bDec);
+          table.querySelector('tbody').appendChild(tr);
+        });
+        var corpo = document.getElementById('corpo-pagina'); corpo.innerHTML = ''; corpo.appendChild(table);
+      }
 
-/* ---------- RENDER / NAVEGAÇÃO ---------- */
-function setBreadcrumb(parts){
-  const nav = document.getElementById('navegacao');
-  nav.innerHTML = '';
-  parts.forEach((p,i)=>{
-    const span = document.createElement('span');
-    span.textContent = p.text;
-    if(p.action){
-      span.style.cursor = 'pointer';
-      span.addEventListener('click', p.action);
-    }
-    nav.appendChild(span);
-    if(i < parts.length-1){
-      const sep = document.createTextNode(' > ');
-      nav.appendChild(sep);
-    }
-  });
-}
+      function renderProposalEditor(tipo){
+        currentProposal = { tipo: tipo, nivel: null, selections: [] };
+        setBreadcrumb([{text:'Início', action:function(){ currentProposal=null; showDefaultMain(); }}, {text:'Proposta: ' + tipo}]);
+        var container = document.createElement('div'); container.className='card';
+        var h = document.createElement('h2'); h.textContent = 'Proposta: ' + tipo; container.appendChild(h);
+        var packDiv = document.createElement('div'); packDiv.className='packages';
+        var niveles = Object.keys(propostas[tipo]||{});
+        niveles.forEach(function(n){
+          var div = document.createElement('div'); div.className='pkg'; div.textContent = n; div.addEventListener('click', function(){ selectPackage(n); });
+          packDiv.appendChild(div);
+        });
+        container.appendChild(packDiv);
+        var itemsHolder = document.createElement('div'); itemsHolder.id = 'pkg-items'; itemsHolder.className='items-list';
+        container.appendChild(itemsHolder);
+        var actions = document.createElement('div'); actions.className='actions';
+        var confirm = document.createElement('button'); confirm.className='btn primary'; confirm.textContent='Confirmar e Reservar'; confirm.addEventListener('click', confirmProposal);
+        var cancel = document.createElement('button'); cancel.className='btn ghost'; cancel.textContent='Cancelar'; cancel.addEventListener('click', function(){ currentProposal=null; document.getElementById('proposal-preview').innerHTML=''; showDefaultMain(); });
+        actions.appendChild(confirm); actions.appendChild(cancel);
+        container.appendChild(actions);
+        var corpo = document.getElementById('corpo-pagina'); corpo.innerHTML=''; corpo.appendChild(container);
+      }
 
-function showDefaultMain(){
-  setBreadcrumb([]);
-  document.getElementById('titulo-pagina').innerText = 'Selecione uma opção ao lado';
-  document.getElementById('corpo-pagina').innerHTML = 'Passe o mouse ou clique nas opções à esquerda para ver o conteúdo correspondente.';
-  document.getElementById('proposal-preview').innerHTML = '';
-  document.getElementById('staff-area').innerHTML = '';
-}
+      function selectPackage(nivel){
+        currentProposal.nivel = nivel;
+        Array.prototype.forEach.call(document.querySelectorAll('.pkg'), function(el){ el.classList.toggle('active', el.textContent===nivel); });
+        var items = propostas[currentProposal.tipo][nivel] || [];
+        currentProposal.selections = items.map(function(it){ return { id: it.id, qty: it.qty, selected:true }; });
+        var holder = document.getElementById('pkg-items'); holder.innerHTML = '';
+        var card = document.createElement('div'); card.className='card';
+        items.forEach(function(it){
+          var prod = estoque.filter(function(p){ return p.id===it.id; })[0] || { nome:'Item não encontrado', qtd:0, info:'' };
+          var row = document.createElement('div'); row.className='item-row';
+          var cb = document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.dataset.id = it.id; cb.addEventListener('change', function(){ var id = parseInt(cb.dataset.id,10); var s = currentProposal.selections.find(function(x){ return x.id===id; }); if(s) s.selected = cb.checked; });
+          var info = document.createElement('div'); info.style.flex='1'; info.innerHTML = '<strong>' + escapeHtml(prod.nome) + '</strong><br><small>' + escapeHtml(prod.info||'') + ' • Disponível total: ' + totalAvailableFor(it.id) + '</small>';
+          var qtyWrap = document.createElement('div'); qtyWrap.innerHTML = '<label>Qtd</label><br>';
+          var inp = document.createElement('input'); inp.type='number'; inp.value = it.qty; inp.min = 1; inp.dataset.id = it.id; inp.className='qty-input';
+          inp.addEventListener('change', function(){ var id = parseInt(inp.dataset.id,10); var s = currentProposal.selections.find(function(x){ return x.id===id; }); if(s) s.qty = Math.max(1, parseInt(inp.value,10) || 1); });
+          qtyWrap.appendChild(inp);
+          row.appendChild(cb); row.appendChild(info); row.appendChild(qtyWrap);
+          card.appendChild(row);
+        });
+        holder.appendChild(card);
+      }
 
-function renderCategoria(cat){
-  catAtual = cat;
-  setorAtual = '';
-  if(cat === 'Freezer'){
-    // show list of freezers (unique locals / setor)
-    const freezers = [...new Set(estoque.filter(i=>i.cat==='Freezer').map(i=>({local:i.local, setor:i.setor, id:i.id})).map(JSON.stringify))].map(JSON.parse);
-    setBreadcrumb([{text:'Início', action:()=>{ catAtual=''; showDefaultMain(); }}, {text:cat}]);
-    document.getElementById('titulo-pagina').innerText = `Freezers`;
-    let html = `<table><thead><tr><th>Freezer</th><th>Qtd Total</th></tr></thead><tbody>`;
-    freezers.forEach(f=>{
-      const total = estoque.filter(p=>p.local===f.local).reduce((s,p)=>s+p.qtd,0);
-      html += `<tr class="linha-clicavel freezer-select" data-local="${escapeHtml(f.local)}" data-setor="${escapeHtml(f.setor)}">
-                <td>❄️ <b>${escapeHtml(f.local)}</b></td>
-                <td>${total}</td>
-               </tr>`;
-    });
-    html += '</tbody></table>';
-    document.getElementById('corpo-pagina').innerHTML = html;
-    // attach listeners (delegation)
-    document.querySelectorAll('.freezer-select').forEach(r=>{
-      r.addEventListener('click', ()=> {
-        const local = r.getAttribute('data-local');
-        const setor = r.getAttribute('data-setor');
-        abrirFreezer(local, setor);
+      function confirmProposal(){
+        if(!currentProposal || !currentProposal.nivel){ alert('Escolha primeiro o nível (Básico / Top / Premium).'); return; }
+        var finalAllocations = [], shortages = [], equipIssues = [];
+        currentProposal.selections.forEach(function(sel){
+          if(!sel.selected) return;
+          var prod = estoque.filter(function(p){ return p.id===sel.id; })[0];
+          if(!prod) return;
+          if(prod.tipo === 'equipamento'){
+            var st = equipamentosStatus[prod.id];
+            if(st && st.status==='em evento'){ equipIssues.push({nome:prod.nome, onde:st.onde}); return; }
+          }
+          var res = reserveAcrossLocationsProportional(sel.id, sel.qty);
+          res.allocations.forEach(function(a){ finalAllocations.push(a); });
+          if(res.shortage > 0) shortages.push({ id: prod.id, nome: prod.nome, need: res.shortage });
+        });
+        localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
+        var timestamp = new Date().toISOString();
+        var lastProposal = { tipo: currentProposal.tipo, nivel: currentProposal.nivel, allocations: finalAllocations, shortages: shortages, equipIssues: equipIssues, timestamp: timestamp };
+        localStorage.setItem('last_proposal', JSON.stringify(lastProposal));
+        renderClientProposalCard(lastProposal);
+        renderStaffPanel();
+        var staffPhone = localStorage.getItem('staff_phone') || '';
+        if(staffPhone){ var msg = buildWhatsAppMessage(lastProposal); window.open('https://wa.me/' + encodeURIComponent(staffPhone) + '?text=' + encodeURIComponent(msg), '_blank'); }
+        else { var el = document.getElementById('proposal-result'); if(el) el.textContent = "Reserva realizada. Configure o número do staff para enviar notificação por WhatsApp."; }
+        currentProposal = null;
+        var pr = document.getElementById('proposal-result'); if(pr) pr.textContent = "Reserva realizada com sucesso.";
+      }
+
+      function buildWhatsAppMessage(proposal){
+        var lines = [];
+        lines.push('Proposta confirmada: ' + proposal.tipo + ' — Nível: ' + proposal.nivel);
+        lines.push('Data: ' + new Date(proposal.timestamp).toLocaleString());
+        lines.push('');
+        if(proposal.allocations.length){
+          lines.push('Itens reservados (origem):');
+          var grouped = {};
+          proposal.allocations.forEach(function(a){ (grouped[a.nome] = grouped[a.nome] || []).push(a); });
+          Object.keys(grouped).forEach(function(nome){
+            lines.push('- ' + nome + ':');
+            grouped[nome].forEach(function(g){ lines.push('   • ' + g.reserved + ' — ' + g.local); });
+          });
+        } else lines.push('Nenhum item reservado.');
+        if(proposal.shortages && proposal.shortages.length){ lines.push(''); lines.push('Faltas / Necessário comprar:'); proposal.shortages.forEach(function(s){ lines.push('- ' + s.nome + ' — falta ' + s.need); }); }
+        if(proposal.equipIssues && proposal.equipIssues.length){ lines.push(''); lines.push('Equipamentos indisponíveis:'); proposal.equipIssues.forEach(function(e){ lines.push('- ' + e.nome + ' — ' + e.onde); }); }
+        lines.push(''); lines.push('Ver painel do staff para detalhes.');
+        return lines.join('\n');
+      }
+
+      function renderClientProposalCard(proposal){
+        var container = document.getElementById('proposal-preview'); container.innerHTML = '';
+        var totals = {};
+        proposal.allocations.forEach(function(a){ totals[a.nome] = (totals[a.nome] || 0) + a.reserved; });
+        var div = document.createElement('div'); div.className='card';
+        var inner = '<div class="proposal-card" id="proposal-card"><div class="proposal-header"><div><h2>Proposta: ' + escapeHtml(proposal.tipo) + '</h2><small>Nível: ' + escapeHtml(proposal.nivel) + '</small></div><div style="text-align:right"><strong>Além do Bolo</strong><br><small>Gestão Buffet Rio</small></div></div><div><strong>Itens reservados:</strong></div><div class="proposal-items">';
+        if(Object.keys(totals).length === 0) inner += '<div><em>Nenhum item reservado (verificar disponibilidade).</em></div>';
+        else Object.keys(totals).forEach(function(nome){ inner += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee"><div>' + escapeHtml(nome) + '</div><div><strong>' + totals[nome] + '</strong></div></div>'; });
+        inner += '</div><div style="margin-top:12px">Observações:</div><div style="margin-top:6px">';
+        if(proposal.shortages.length) inner += '<div style="color:#b91c1c"><strong>Alguns itens em falta — equipe será notificada.</strong></div>';
+        else inner += '<div style="color:#065f46"><strong>Estoque suficiente para os itens selecionados.</strong></div>';
+        inner += '</div><div style="margin-top:12px; font-size:0.9rem; color:#475569">Data da proposta: ' + new Date(proposal.timestamp).toLocaleString() + '</div></div>';
+        inner += '<div style="margin-top:12px; display:flex; gap:8px;"><button class="btn primary" onclick="exportProposalPNG()">Exportar imagem (PNG)</button><button class="btn ghost" onclick="printProposal()">Imprimir</button></div>';
+        div.innerHTML = inner; container.appendChild(div);
+      }
+
+      function renderStaffPanel(openNow){
+        var staff = document.getElementById('staff-area'); staff.innerHTML='';
+        var needToBuy = estoque.filter(function(i){ return i.qtd < i.min; }).map(function(i){ return { id:i.id, nome:i.nome, falta:i.min - i.qtd, setor:i.setor }; });
+        equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || equipamentosStatus;
+        var lastProposal = JSON.parse(localStorage.getItem('last_proposal') || 'null');
+        var div = document.createElement('div'); div.className='card';
+        var h3 = document.createElement('h3'); h3.textContent = 'Painel do Staff'; div.appendChild(h3);
+        var flex = document.createElement('div'); flex.style.display='flex'; flex.style.gap='12px'; flex.style.alignItems='flex-start';
+        var left = document.createElement('div'); left.style.flex='1';
+        left.innerHTML = '<div><strong>Lista de Compras (itens abaixo do mínimo)</strong></div>';
+        if(needToBuy.length){ var ul = document.createElement('ul'); needToBuy.forEach(function(n){ var li = document.createElement('li'); li.innerHTML = escapeHtml(n.nome) + ' — falta ' + n.falta + ' (' + escapeHtml(n.setor) + ')'; ul.appendChild(li); }); left.appendChild(ul); }
+        else { var note = document.createElement('div'); note.className='note'; note.textContent = 'Nenhum item crítico no momento.'; left.appendChild(note); }
+        flex.appendChild(left);
+        var right = document.createElement('div'); right.style.width='360px';
+        var equipHtml = '<div><strong>Equipamentos</strong></div><ul>';
+        Object.keys(equipamentosStatus).forEach(function(k){ var st = equipamentosStatus[k]; var prod = estoque.filter(function(p){ return p.id==k; })[0]; equipHtml += '<li>' + (prod?escapeHtml(prod.nome):'Equipamento '+k) + ' — <em>' + escapeHtml(st.status) + '</em>' + (st.onde? ' - ' + escapeHtml(st.onde) : '') + '</li>'; });
+        equipHtml += '</ul>';
+        right.innerHTML = equipHtml + '<div style="margin-top:8px"><strong>Número do staff (WhatsApp)</strong><input id="staff-phone" class="small" placeholder="5511999999999" value="' + escapeHtml(localStorage.getItem('staff_phone') || '') + '"><div style="display:flex;gap:6px;margin-top:6px"><button class="btn primary" id="save-phone">Salvar número</button><button class="btn ghost" id="send-last">Enviar última proposta por WhatsApp</button></div></div>';
+        flex.appendChild(right);
+        div.appendChild(flex);
+        var lastDiv = document.createElement('div'); lastDiv.style.marginTop='10px'; lastDiv.innerHTML = '<strong>Última Proposta (detalhes de origem)</strong>';
+        if(lastProposal){ lastDiv.innerHTML += '<div style="font-size:0.9rem;margin-top:6px"><em>' + new Date(lastProposal.timestamp).toLocaleString() + '</em></div>'; if(lastProposal.allocations.length){ Object.keys(lastProposal.allocations.reduce(function(acc,a){ acc[a.nome]=true; return acc; },{})).forEach(function(nome){ lastDiv.innerHTML += '<div style="margin-top:6px"><strong>' + escapeHtml(nome) + '</strong></div>'; }); if(lastProposal.shortages.length){ lastDiv.innerHTML += '<div style="margin-top:8px;color:#b91c1c"><strong>Faltas:</strong><ul>'; lastProposal.shortages.forEach(function(s){ lastDiv.innerHTML += '<li>' + escapeHtml(s.nome) + ' — falta ' + s.need + '</li>'; }); lastDiv.innerHTML += '</ul></div>'; } if(lastProposal.equipIssues && lastProposal.equipIssues.length){ lastDiv.innerHTML += '<div style="margin-top:8px;color:#92400e"><strong>Equipamentos indisponíveis:</strong><ul>'; lastProposal.equipIssues.forEach(function(e){ lastDiv.innerHTML += '<li>' + escapeHtml(e.nome) + ' — ' + escapeHtml(e.onde) + '</li>'; }); lastDiv.innerHTML += '</ul></div>'; } } else lastDiv.innerHTML += '<div style="margin-top:6px"><em>Nenhuma alocação.</em></div>'; } else lastDiv.innerHTML += '<div style="margin-top:6px"><em>Nenhuma proposta registrada ainda.</em></div>'; div.appendChild(lastDiv); div.innerHTML += '<div style="margin-top:10px"><small>Última atualização: ' + new Date().toLocaleString() + '</small></div>';
+        staff.appendChild(div);
+        document.getElementById('save-phone').addEventListener('click', saveStaffPhone);
+        document.getElementById('send-last').addEventListener('click', sendLastProposalWhatsApp);
+        if(openNow) staff.scrollIntoView({behavior:'smooth'});
+      }
+
+      function saveStaffPhone(){ var el = document.getElementById('staff-phone'); if(!el) return; var v = (el.value||'').trim(); if(!v){ alert('Informe o telefone no formato internacional sem sinais (ex: 5511999999999)'); return; } localStorage.setItem('staff_phone', v); alert('Número do staff salvo.'); }
+      function sendLastProposalWhatsApp(){ var staffPhone = localStorage.getItem('staff_phone') || ''; if(!staffPhone){ alert('Configure primeiro o número do staff.'); return; } var lastProposal = JSON.parse(localStorage.getItem('last_proposal') || 'null'); if(!lastProposal){ alert('Não há proposta para enviar.'); return; } var msg = buildWhatsAppMessage(lastProposal); window.open('https://wa.me/' + encodeURIComponent(staffPhone) + '?text=' + encodeURIComponent(msg), '_blank'); }
+      function printProposal(){ var el = document.getElementById('proposal-card'); if(!el) return alert('Nenhuma proposta para imprimir.'); var w = window.open('','_blank'); w.document.write('<html><head><title>Proposta</title></head><body>'); w.document.write(el.outerHTML); w.document.write('</body></html>'); w.document.close(); w.print(); }
+      window.exportProposalPNG = function(){ var el = document.getElementById('proposal-card'); if(!el) return alert('Nenhuma proposta para exportar.'); html2canvas(el, { scale:2 }).then(function(canvas){ var url = canvas.toDataURL('image/png'); var a = document.createElement('a'); a.href = url; a.download = 'proposta_buffet_rio.png'; a.click(); }).catch(function(){ alert('Erro ao gerar imagem.'); }); };
+
+      function ajustarEstoque(id, valor){ var item = estoque.find(function(i){ return i.id===id; }); if(!item) return; item.qtd = Math.max(0, item.qtd + valor); localStorage.setItem('buffet_rio_db', JSON.stringify(estoque)); if(catAtual){ if(catAtual==='Freezer') renderCategoria(catAtual); else renderCategoria(catAtual); } else renderizar(); }
+      function renderizar(){ if(catAtual) renderCategoria(catAtual); else showDefaultMain(); }
+
+      // hover preview logic (show small card on hover)
+      var hoverPreview = document.getElementById('hover-preview');
+      document.querySelectorAll('.btn-menu').forEach(function(btn){
+        btn.addEventListener('mouseenter', function(){
+          var type = btn.getAttribute('data-type'), key = btn.getAttribute('data-key');
+          hoverPreview.style.display = 'block'; hoverPreview.innerHTML = '';
+          var rect = btn.getBoundingClientRect();
+          var card = document.createElement('div'); card.className='hover-card';
+          if(type==='categoria'){
+            if(key==='Freezer'){ var freezers=[]; estoque.forEach(function(i){ if(i.cat==='Freezer' && freezers.indexOf(i.local)===-1) freezers.push(i.local); }); var html = '<strong>' + escapeHtml(key) + '</strong><div style="margin-top:8px">Freezers disponíveis:</div><ul>'; freezers.forEach(function(f){ html += '<li>' + escapeHtml(f) + ' — ' + estoque.filter(function(p){ return p.local===f; }).reduce(function(s,p){ return s + p.qtd; },0) + '</li>'; }); html += '</ul>'; card.innerHTML = html; }
+            else { var setores = []; estoque.forEach(function(i){ if(i.cat===key && setores.indexOf(i.setor)===-1) setores.push(i.setor); }); var html2 = '<strong>' + escapeHtml(key) + '</strong><div style="margin-top:8px">Setores:</div><ul>'; setores.slice(0,5).forEach(function(s){ html2 += '<li>' + escapeHtml(s) + ' — ' + estoque.filter(function(p){ return p.setor===s; }).reduce(function(su,p){ return su + p.qtd; },0) + '</li>'; }); html2 += '</ul>'; card.innerHTML = html2; }
+          } else if(type==='proposta'){ var niveles = Object.keys(propostas[key]||{}); card.innerHTML = '<strong>Proposta: ' + escapeHtml(key) + '</strong><div style="margin-top:8px">Níveis: ' + niveles.join(', ') + '</div>'; }
+          else card.innerHTML = '<strong>Painel do Staff</strong><div style="margin-top:8px">Ver lista de compras, equipamentos e última proposta.</div>';
+          hoverPreview.appendChild(card);
+          hoverPreview.style.left = (rect.right + 10) + 'px';
+          hoverPreview.style.top = (rect.top) + 'px';
+        });
       });
-    });
-  } else {
-    // Default category behavior: list setores for that category (unchanged)
-    setBreadcrumb([{text:'Início', action:()=>{ catAtual=''; showDefaultMain(); }}, {text:cat}]);
-    document.getElementById('titulo-pagina').innerText = `Setores da ${cat}`;
-    const setores = [...new Set(estoque.filter(i=>i.cat===cat).map(i=>i.setor))];
-    let html = `<table><thead><tr><th>Setor / Localização</th><th>Qtd Total</th></tr></thead><tbody>`;
-    setores.forEach(s=>{
-      const total = estoque.filter(i=>i.cat===cat && i.setor===s).reduce((a,b)=>a+b.qtd,0);
-      html += `<tr class="linha-clicavel sector-select" data-setor="${escapeHtml(s)}">
-                <td>📂 Setor: <b>${escapeHtml(s)}</b></td>
-                <td>${total}</td>
-               </tr>`;
-    });
-    html += '</tbody></table>';
-    document.getElementById('corpo-pagina').innerHTML = html;
-    document.querySelectorAll('.sector-select').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        const s = el.getAttribute('data-setor');
-        abrirSetor(s);
+      document.getElementById('left-nav').addEventListener('mouseleave', function(){ hoverPreview.style.display='none'; hoverPreview.innerHTML=''; });
+
+      // click delegation for left menu
+      document.getElementById('left-nav').addEventListener('click', function(e){
+        var btn = e.target.closest('.btn-menu'); if(!btn) return;
+        var type = btn.getAttribute('data-type'), key = btn.getAttribute('data-key');
+        hoverPreview.style.display='none'; hoverPreview.innerHTML='';
+        if(type==='categoria') renderCategoria(key);
+        else if(type==='proposta') renderProposalEditor(key);
+        else if(type==='admin') renderStaffPanel(true);
       });
-    });
-  }
-}
 
-function abrirFreezer(local, setor){
-  // set setorAtual as the freezer's sector and render items
-  setorAtual = setor;
-  catAtual = 'Freezer';
-  setBreadcrumb([{text:'Início', action:()=>{ catAtual=''; showDefaultMain(); }},{text:catAtual, action:()=>renderCategoria(catAtual)},{text:setor}]);
-  document.getElementById('titulo-pagina').innerText = `Itens em: ${setor} (${local})`;
-  const itens = estoque.filter(i=>i.cat==='Freezer' && i.local===local);
-  renderItemsTable(itens);
-}
+      // init
+      showDefaultMain();
+      renderizar();
 
-function abrirSetor(s){
-  setorAtual = s;
-  setBreadcrumb([{text:'Início', action:()=>{ catAtual=''; showDefaultMain(); }},{text:catAtual, action:()=>renderCategoria(catAtual)},{text:setorAtual}]);
-  document.getElementById('titulo-pagina').innerText = `Itens em: ${setorAtual}`;
-  const itens = estoque.filter(i=>i.cat===catAtual && i.setor===setorAtual);
-  renderItemsTable(itens);
-}
-
-function renderItemsTable(itens){
-  let html = `<table><thead><tr><th>Item</th><th>Qtd</th><th>Info Técnica</th><th>Movimentação</th></tr></thead><tbody>`;
-  itens.forEach(p=>{
-    html += `<tr>
-      <td><b>${escapeHtml(p.nome)}</b></td>
-      <td class="${p.qtd<=p.min ? 'alerta' : ''}">${p.qtd}</td>
-      <td><small>${escapeHtml(p.info||'-')}</small></td>
-      <td>
-        <button class="btn-qtd" data-action="inc" data-id="${p.id}">+</button>
-        <button class="btn-qtd" data-action="dec" data-id="${p.id}">-</button>
-      </td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('corpo-pagina').innerHTML = html;
-  // attach qty buttons
-  document.querySelectorAll('.btn-qtd').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const id = parseInt(b.getAttribute('data-id'),10);
-      const act = b.getAttribute('data-action');
-      ajustarEstoque(id, act==='inc'?1:-1);
-    });
-  });
-}
-
-function renderProposalEditor(tipo){
-  currentProposal = { tipo, nivel: null, selections: [] };
-  setBreadcrumb([{text:'Início', action:()=>{ currentProposal=null; showDefaultMain(); }}, {text:`Proposta: ${tipo}`}]);
-  const niveles = Object.keys(propostas[tipo]||{});
-  let html = `<div class="card"><h2>Proposta: ${escapeHtml(tipo)}</h2>
-    <div class="packages">`;
-  niveles.forEach(n=>{
-    html += `<div class="pkg" data-pkg="${escapeHtml(n)}">${escapeHtml(n)}</div>`;
-  });
-  html += `</div><div id="pkg-items" class="items-list"></div>
-    <div class="actions">
-      <button class="btn primary" id="confirm-prop">Confirmar e Reservar</button>
-      <button class="btn ghost" id="cancel-prop">Cancelar</button>
-    </div><div id="proposal-result"></div></div>`;
-  document.getElementById('corpo-pagina').innerHTML = html;
-  // event listeners
-  document.querySelectorAll('.pkg').forEach(el=>{
-    el.addEventListener('click', ()=> selectPackage(el.getAttribute('data-pkg')));
-  });
-  document.getElementById('cancel-prop').addEventListener('click', ()=>{ currentProposal=null; document.getElementById('proposal-preview').innerHTML=''; showDefaultMain(); });
-  document.getElementById('confirm-prop').addEventListener('click', confirmProposal);
-}
-
-function selectPackage(nivel){
-  currentProposal.nivel = nivel;
-  // visual
-  document.querySelectorAll('.pkg').forEach(el=>el.classList.toggle('active', el.getAttribute('data-pkg')===nivel));
-  const items = propostas[currentProposal.tipo][nivel] || [];
-  currentProposal.selections = items.map(it => ({ id: it.id, qty: it.qty, selected: true }));
-  let html = `<div style="margin-top:10px"><strong>Itens sugeridos (ajuste quantidade se necessário)</strong></div>`;
-  html += `<div class="card" style="margin-top:8px">`;
-  items.forEach(it=>{
-    const prod = estoque.find(p=>p.id===it.id) || {nome:'Item não encontrado', qtd:0};
-    html += `<div class="item-row">
-      <input type="checkbox" id="sel-${it.id}" checked data-id="${it.id}">
-      <div style="flex:1"><strong>${escapeHtml(prod.nome)}</strong><br><small>${escapeHtml(prod.info||'')} • Disponível total: ${totalAvailableFor(it.id)}</small></div>
-      <div><label>Qtd</label><br><input type="number" min="1" value="${it.qty}" data-id="${it.id}" class="qty-input"></div>
-    </div>`;
-  });
-  html += `</div>`;
-  document.getElementById('pkg-items').innerHTML = html;
-  // attach listeners
-  document.querySelectorAll('#pkg-items input[type="checkbox"]').forEach(cb=>{
-    cb.addEventListener('change', ()=> {
-      const id = parseInt(cb.getAttribute('data-id'),10);
-      const s = currentProposal.selections.find(x=>x.id===id);
-      if(s) s.selected = cb.checked;
-    });
-  });
-  document.querySelectorAll('.qty-input').forEach(inp=>{
-    inp.addEventListener('change', ()=> {
-      const id = parseInt(inp.getAttribute('data-id'),10);
-      const s = currentProposal.selections.find(x=>x.id===id);
-      if(s) s.qty = Math.max(1, parseInt(inp.value,10)||1);
-    });
-  });
-}
-
-/* ---------- Confirm / render cliente + staff (manteniendo lógica previa) ---------- */
-function confirmProposal(){
-  if(!currentProposal || !currentProposal.nivel){ alert('Escolha primeiro o nível (Básico / Top / Premium).'); return; }
-  const finalAllocations = [];
-  const shortages = [];
-  const equipIssues = [];
-  for(const sel of currentProposal.selections){
-    if(!sel.selected) continue;
-    const prod = estoque.find(p=>p.id===sel.id);
-    if(!prod) continue;
-    if(prod.tipo==='equipamento'){
-      const st = equipamentosStatus[prod.id];
-      if(st && st.status === 'em evento'){ equipIssues.push({nome:prod.nome, onde:st.onde}); continue; }
-      const { allocations, shortage } = reserveAcrossLocationsProportional(sel.id, sel.qty);
-      allocations.forEach(a=> finalAllocations.push(a));
-      if(shortage>0) shortages.push({id:prod.id, nome:prod.nome, need:shortage});
-    } else {
-      const { allocations, shortage } = reserveAcrossLocationsProportional(sel.id, sel.qty);
-      allocations.forEach(a=> finalAllocations.push(a));
-      if(shortage>0) shortages.push({id:prod.id, nome:prod.nome, need:shortage});
+      // expose some functions for debugging
+      window.app = { renderizar: renderizar, renderCategoria: renderCategoria, estoque: estoque };
+    } catch(err) {
+      console.error('Execution error in app script:', err);
+      // show minimal friendly error and fallback UI
+      document.getElementById('titulo-pagina').textContent = 'Ocorreu um erro ao carregar a aplicação';
+      document.getElementById('corpo-pagina').textContent = 'Abra o Console (F12) para ver detalhes. Se o erro persistir, limpe o cache e desregistre qualquer Service Worker.';
     }
-  }
-  localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
-  const timestamp = new Date().toISOString();
-  const lastProposal = { tipo: currentProposal.tipo, nivel: currentProposal.nivel, allocations: finalAllocations, shortages, equipIssues, timestamp };
-  localStorage.setItem('last_proposal', JSON.stringify(lastProposal));
-  renderClientProposalCard(lastProposal);
-  renderStaffPanel();
-  // click-to-chat staff if configured
-  const staffPhone = localStorage.getItem('staff_phone') || '';
-  if(staffPhone){
-    const msg = buildWhatsAppMessage(lastProposal);
-    const url = `https://wa.me/${encodeURIComponent(staffPhone)}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-  } else {
-    document.getElementById('proposal-result')?.innerText = "Reserva realizada. Configure o número do staff para enviar notificação por WhatsApp.";
-  }
-  currentProposal = null;
-  document.getElementById('proposal-result')?.innerText = "Reserva realizada com sucesso.";
-}
-
-function buildWhatsAppMessage(proposal){
-  const lines = [];
-  lines.push(`Proposta confirmada: ${proposal.tipo} — Nível: ${proposal.nivel}`);
-  lines.push(`Data: ${new Date(proposal.timestamp).toLocaleString()}`);
-  lines.push('');
-  if(proposal.allocations.length){
-    lines.push('Itens reservados (origem):');
-    const grouped = {};
-    proposal.allocations.forEach(a=> (grouped[a.nome]=grouped[a.nome]||[]).push(a));
-    Object.keys(grouped).forEach(nome=>{
-      lines.push(`- ${nome}:`);
-      grouped[nome].forEach(g=> lines.push(`   • ${g.reserved} — ${g.local}`));
-    });
-  } else lines.push('Nenhum item reservado.');
-  if(proposal.shortages && proposal.shortages.length){ lines.push(''); lines.push('Faltas / Necessário comprar:'); proposal.shortages.forEach(s=> lines.push(`- ${s.nome} — falta ${s.need}`)); }
-  if(proposal.equipIssues && proposal.equipIssues.length){ lines.push(''); lines.push('Equipamentos indisponíveis:'); proposal.equipIssues.forEach(e=> lines.push(`- ${e.nome} — ${e.onde}`)); }
-  lines.push(''); lines.push('Ver painel do staff para detalhes.');
-  return lines.join('\n');
-}
-
-function renderClientProposalCard(proposal){
-  const container = document.getElementById('proposal-preview');
-  const totals = {};
-  proposal.allocations.forEach(a=> totals[a.nome] = (totals[a.nome]||0) + a.reserved);
-  let html = `<div style="margin-top:14px" class="card">
-    <div class="proposal-card" id="proposal-card">
-      <div class="proposal-header">
-        <div><h2>Proposta: ${escapeHtml(proposal.tipo)}</h2><small>Nível: ${escapeHtml(proposal.nivel)}</small></div>
-        <div style="text-align:right"><strong>Além do Bolo</strong><br><small>Gestão Buffet Rio</small></div>
-      </div>
-      <div><strong>Itens reservados:</strong></div>
-      <div class="proposal-items">`;
-  if(Object.keys(totals).length===0) html += `<div><em>Nenhum item reservado (verificar disponibilidade).</em></div>`;
-  else Object.keys(totals).forEach(nome=> html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee"><div>${escapeHtml(nome)}</div><div><strong>${totals[nome]}</strong></div></div>`);
-  html += `</div><div style="margin-top:12px">Observações:</div><div style="margin-top:6px">`;
-  if(proposal.shortages.length) html += `<div style="color:#b91c1c"><strong>Alguns itens em falta — equipe será notificada.</strong></div>`;
-  else html += `<div style="color:#065f46"><strong>Estoque suficiente para os itens selecionados.</strong></div>`;
-  html += `</div><div style="margin-top:12px; font-size:0.9rem; color:#475569">Data da proposta: ${new Date(proposal.timestamp).toLocaleString()}</div></div>
-    <div style="margin-top:12px; display:flex; gap:8px;"><button class="btn primary" onclick="exportProposalPNG()">Exportar imagem (PNG)</button><button class="btn ghost" onclick="printProposal()">Imprimir</button></div></div>`;
-  container.innerHTML = html;
-}
-
-/* ---------- Staff panel and helpers ---------- */
-function openStaffPanel(){ renderStaffPanel(true); }
-function renderStaffPanel(openNow){
-  const staff = document.getElementById('staff-area');
-  const needToBuy = estoque.filter(i=>i.qtd<i.min).map(i=>({id:i.id,nome:i.nome,falta:i.min-i.qtd,setor:i.setor}));
-  equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || equipamentosStatus;
-  const lastProposal = JSON.parse(localStorage.getItem('last_proposal') || 'null');
-  let html = `<div class="card"><h3>Painel do Staff</h3><div style="display:flex;gap:12px;align-items:flex-start"><div style="flex:1">`;
-  html += `<div><strong>Lista de Compras (itens abaixo do mínimo)</strong></div>`;
-  if(needToBuy.length){ html += `<ul>`; needToBuy.forEach(n=> html += `<li>${escapeHtml(n.nome)} — falta ${n.falta} (${escapeHtml(n.setor)})</li>`); html += `</ul>`; }
-  else html += `<div class="note">Nenhum item crítico no momento.</div>`;
-  html += `</div><div style="width:360px"><div><strong>Equipamentos</strong></div><ul>`;
-  Object.keys(equipamentosStatus).forEach(k=>{ const st = equipamentosStatus[k]; const prod = estoque.find(p=>p.id==k); html += `<li>${prod?escapeHtml(prod.nome):'Equipamento '+k} — <em>${escapeHtml(st.status)}</em> ${st.onde?'- '+escapeHtml(st.onde):''}</li>`; });
-  html += `</ul><div style="margin-top:8px"><strong>Número do staff (WhatsApp)</strong>`;
-  const staffPhone = localStorage.getItem('staff_phone') || '';
-  html += `<input id="staff-phone" class="small" placeholder="5511999999999" value="${escapeHtml(staffPhone)}">`;
-  html += `<div style="display:flex;gap:6px;margin-top:6px"><button class="btn primary" id="save-phone">Salvar número</button><button class="btn ghost" id="send-last">Enviar última proposta por WhatsApp</button></div></div>`;
-  html += `<div style="margin-top:10px"><strong>Última Proposta (detalhes de origem)</strong>`;
-  if(lastProposal){
-    html += `<div style="font-size:0.9rem;margin-top:6px"><em>${new Date(lastProposal.timestamp).toLocaleString()}</em></div>`;
-    if(lastProposal.allocations.length){
-      html += `<div style="margin-top:6px">`;
-      const grouped = {};
-      lastProposal.allocations.forEach(a=> (grouped[a.nome]=grouped[a.nome]||[]).push(a));
-      Object.keys(grouped).forEach(nome=>{
-        html += `<div style="margin-top:6px"><strong>${escapeHtml(nome)}</strong>`;
-        grouped[nome].forEach(g=> html += `<div style="display:flex;justify-content:space-between;padding:4px 0"><div style="color:#475569">${escapeHtml(g.local)}</div><div><strong>${g.reserved}</strong></div></div>`);
-        html += `</div>`;
-      });
-      html += `</div>`;
-    } else html += `<div style="margin-top:6px"><em>Nenhuma alocação.</em></div>`;
-    if(lastProposal.shortages.length) { html += `<div style="margin-top:8px;color:#b91c1c"><strong>Faltas:</strong><ul>`; lastProposal.shortages.forEach(s=> html += `<li>${escapeHtml(s.nome)} — falta ${s.need}</li>`); html += `</ul></div>`; }
-    if(lastProposal.equipIssues && lastProposal.equipIssues.length){ html += `<div style="margin-top:8px;color:#92400e"><strong>Equipamentos indisponíveis:</strong><ul>`; lastProposal.equipIssues.forEach(e=> html += `<li>${escapeHtml(e.nome)} — ${escapeHtml(e.onde)}</li>`); html += `</ul></div>`; }
-  } else html += `<div style="margin-top:6px"><em>Nenhuma proposta registrada ainda.</em></div>`;
-  html += `</div></div><div style="margin-top:10px"><small>Última atualização: ${new Date().toLocaleString()}</small></div></div>`;
-  staff.innerHTML = html;
-  // listeners
-  document.getElementById('save-phone').addEventListener('click', saveStaffPhone);
-  document.getElementById('send-last').addEventListener('click', sendLastProposalWhatsApp);
-  if(openNow) staff.scrollIntoView({behavior:'smooth'});
-}
-
-function saveStaffPhone(){
-  const el = document.getElementById('staff-phone');
-  if(!el) return;
-  const v = (el.value||'').trim();
-  if(!v){ alert('Informe o telefone no formato internacional sem sinais (ex: 5511999999999)'); return; }
-  localStorage.setItem('staff_phone', v);
-  alert('Número do staff salvo.');
-}
-function sendLastProposalWhatsApp(){
-  const staffPhone = localStorage.getItem('staff_phone') || '';
-  if(!staffPhone){ alert('Configure primeiro o número do staff.'); return; }
-  const lastProposal = JSON.parse(localStorage.getItem('last_proposal') || 'null');
-  if(!lastProposal){ alert('Não há proposta para enviar.'); return; }
-  const msg = buildWhatsAppMessage(lastProposal);
-  const url = `https://wa.me/${encodeURIComponent(staffPhone)}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-}
-
-/* ---------- helpers: print/export and small util ---------- */
-function printProposal(){ const el = document.getElementById('proposal-card'); if(!el) return alert('Nenhuma proposta para imprimir.'); const w = window.open('', '_blank'); w.document.write('<html><head><title>Proposta</title></head><body>'); w.document.write(el.outerHTML); w.document.write('</body></html>'); w.document.close(); w.print(); }
-function exportProposalPNG(){ const el = document.getElementById('proposal-card'); if(!el) return alert('Nenhuma proposta para exportar.'); html2canvas(el, { scale:2 }).then(canvas=>{ const url = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = url; a.download = 'proposta_buffet_rio.png'; a.click(); }).catch(()=>alert('Erro ao gerar imagem.')); }
-function ajustarEstoque(id, valor){ const item = estoque.find(i=>i.id===id); if(!item) return; item.qtd = Math.max(0, item.qtd + valor); localStorage.setItem('buffet_rio_db', JSON.stringify(estoque)); if(setorAtual) { if(catAtual==='Freezer') renderizar(); else renderizarSetor(); } else renderizar(); }
-function renderizar(){ if(catAtual) renderCategoria(catAtual); else showDefaultMain(); }
-
-/* ---------- Hover preview behavior (show only content of button hovered) ---------- */
-const hoverPreview = document.getElementById('hover-preview');
-document.querySelectorAll('.btn-menu').forEach(btn=>{
-  btn.addEventListener('mouseenter', (e)=>{
-    const type = btn.getAttribute('data-type');
-    const key = btn.getAttribute('data-key');
-    showHoverPreview(type, key, btn);
-  });
-});
-document.getElementById('left-nav').addEventListener('mouseleave', ()=> {
-  hideHoverPreview();
-});
-
-function showHoverPreview(type, key, btn){
-  hoverPreview.style.display = 'block';
-  hoverPreview.innerHTML = '';
-  const rect = btn.getBoundingClientRect();
-  const card = document.createElement('div');
-  card.className = 'hover-card';
-  if(type==='categoria'){
-    // simple preview: list top 3 setores / freezers and totals
-    if(key==='Freezer'){
-      const freezers = [...new Set(estoque.filter(i=>i.cat==='Freezer').map(i=>i.local))];
-      card.innerHTML = `<strong>${escapeHtml(key)}</strong><div style="margin-top:8px">Freezers disponíveis:</div><ul>${freezers.map(f=>`<li>${escapeHtml(f)} — ${estoioTotalByLocal(f)}</li>`).join('')}</ul>`;
-    } else {
-      const setores = [...new Set(estoque.filter(i=>i.cat===key).map(i=>i.setor))].slice(0,5);
-      card.innerHTML = `<strong>${escapeHtml(key)}</strong><div style="margin-top:8px">Setores:</div><ul>${setores.map(s=>`<li>${escapeHtml(s)} — ${estoioTotalBySetor(s)}</li>`).join('')}</ul>`;
-    }
-  } else if(type==='proposta'){
-    const niveles = Object.keys(propostas[key]||{});
-    card.innerHTML = `<strong>Proposta: ${escapeHtml(key)}</strong><div style="margin-top:8px">Níveis: ${niveles.join(', ')}</div>`;
-  } else if(type==='admin'){
-    card.innerHTML = `<strong>Painel do Staff</strong><div style="margin-top:8px">Ver lista de compras, equipamentos e última proposta.</div>`;
-  }
-  hoverPreview.appendChild(card);
-  // position
-  hoverPreview.style.left = (rect.right + 10) + 'px';
-  hoverPreview.style.top = (rect.top) + 'px';
-}
-
-function hideHoverPreview(){ hoverPreview.style.display = 'none'; hoverPreview.innerHTML = ''; }
-
-function estoioTotalByLocal(local){ return estoque.filter(p=>p.local===local).reduce((s,p)=>s+p.qtd,0); }
-function estoioTotalBySetor(setor){ return estoque.filter(p=>p.setor===setor).reduce((s,p)=>s+p.qtd,0); }
-
-/* ---------- Click behavior: left menu delegation ---------- */
-document.getElementById('left-nav').addEventListener('click', (e)=>{
-  const btn = e.target.closest('.btn-menu');
-  if(!btn) return;
-  const type = btn.getAttribute('data-type');
-  const key = btn.getAttribute('data-key');
-  hideHoverPreview();
-  if(type==='categoria') renderCategoria(key);
-  else if(type==='proposta') renderProposalEditor(key);
-  else if(type==='admin') openStaffPanel();
-});
-
-/* ---------- Small helpers ---------- */
-function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-
-/* ---------- Init ---------- */
-showDefaultMain();
-renderizar();
-
-/* Expose a few helpers to console for debug (optional) */
-window._app = { estoque, renderizar, renderStaffPanel, renderCategoria, renderProposalEditor };
-
-</script>
+  }); // end DOMContentLoaded
+  </script>
 </body>
 </html>
