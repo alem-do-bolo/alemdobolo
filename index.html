@@ -41,6 +41,7 @@
     .proposal-items { margin-top:8px; }
     .staff-panel { margin-top:18px; padding:12px; background:#fff7ed; border-radius:8px; border:1px solid #fde3c6; }
     .note { font-size:.9rem; color:#7b341e; }
+    input.small { width:100%; padding:6px; border:1px solid var(--borda); border-radius:6px; }
   </style>
 </head>
 <body>
@@ -82,29 +83,26 @@
 <!-- html2canvas para exportar a proposta como imagem -->
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
-/* --- Banco de Dados Local --- */
+/* --- Dados iniciais (localStorage) --- */
 let estoque = JSON.parse(localStorage.getItem('buffet_rio_db')) || [
   { id:1, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante A", nome:"Carne Bovina", qtd:25, min:10, info:"-2°C", tipo:"ingrediente" },
   { id:2, cat:"Câmara", local:"Câmara Fria 1", setor:"Estante B", nome:"Laticínios", qtd:8, min:15, info:"Validade curta", tipo:"ingrediente" },
-  // Freezer 1
   { id:3, cat:"Freezer", local:"Freezer Vertical 1", setor:"Gaveta 1 - F1", nome:"Polpas de Fruta", qtd:40, min:10, info:"Freezer 1", tipo:"ingrediente" },
-  // Freezer 2
   { id:6, cat:"Freezer", local:"Freezer Horizontal 2", setor:"Gaveta 1 - F2", nome:"Polpas de Fruta (F2)", qtd:20, min:10, info:"Freezer 2", tipo:"ingrediente" },
   { id:4, cat:"Equipamento", local:"Cozinha Central", setor:"Bancada", nome:"Fritadeira Elétrica", qtd:2, min:1, info:"Voltagem:220V", tipo:"equipamento" },
   { id:5, cat:"Material", local:"Depósito", setor:"Prateleira 4", nome:"Pratos Rasos", qtd:150, min:100, info:"Porcelana Branca", tipo:"material" }
 ];
 localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
 
-/* Estado */
+let equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || { 4: { status: "em evento", onde: "Casamento - Praia" } };
+localStorage.setItem('equip_status', JSON.stringify(equipamentosStatus));
+
+/* Estado de UI */
 let catAtual = "";
 let setorAtual = "";
 let currentProposal = null;
 
-/* Atualiza status de equipamentos (simulado) */
-let equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || { 4: { status: "em evento", onde: "Casamento - Praia" } };
-localStorage.setItem('equip_status', JSON.stringify(equipamentosStatus));
-
-/* --- Propostas: agora com níveis 'Básico', 'Top', 'Premium' --- */
+/* Propostas (Básico / Top / Premium) */
 const propostas = {
   "Café Manhã": {
     "Básico": [{id:5, qty:30}, {id:3, qty:10}],
@@ -113,7 +111,7 @@ const propostas = {
   },
   "Coffee Meal": {
     "Básico":[{id:5, qty:20}, {id:3, qty:15}],
-    "Top":   [{id:5, qty:40}, {id:3, qty:30}, {id:2, qty:10}],
+    "Top":[{id:5, qty:40}, {id:3, qty:30}, {id:2, qty:10}],
     "Premium":[{id:5, qty:60}, {id:3, qty:40}, {id:2, qty:20}, {id:1, qty:15}]
   },
   "Almoço": {
@@ -133,48 +131,79 @@ const propostas = {
   }
 };
 
-/* ------------------ Utilidades para reserva agregada ------------------ */
-/* Normaliza o nome base removendo etiquetas entre parênteses e espaços extras */
+/* UTILIDADES DE RESERVA PROPORCIONAL */
 function baseName(nome) {
   return nome.replace(/\s*\(.*\)\s*/g, '').trim().toLowerCase();
 }
-
-/* Retorna quantidade total disponível para um produto (agrupando por baseName) */
 function totalAvailableFor(id) {
-  const prod = estoque.find(p=>p.id===id);
+  const prod = estoque.find(p => p.id === id);
   if(!prod) return 0;
   const base = baseName(prod.nome);
-  return estoque.filter(p=>baseName(p.nome) === base).reduce((s,p)=>s+p.qtd,0);
+  return estoque.filter(p => baseName(p.nome) === base).reduce((s,p)=>s+p.qtd,0);
 }
 
-/* Tenta reservar qty para o produto id procurando em todas as localizações com o mesmo baseName.
-   Retorna { allocations: [{id,nome,local,reserved}], shortage: n } */
-function reserveAcrossLocations(id, qty) {
+/* Reserva proporcional entre localizações (balanceo proporcional).
+   Retorna { allocations: [{id,nome,local,reserved}], shortage: n } y decrementa en-memory el estoque. */
+function reserveAcrossLocationsProportional(id, qty) {
   const main = estoque.find(p=>p.id===id);
   if(!main) return { allocations: [], shortage: qty };
+
   const base = baseName(main.nome);
+  const candidates = estoque.filter(p => baseName(p.nome) === base && p.qtd > 0);
+  const totalAvailable = candidates.reduce((s,c)=>s+c.qtd, 0);
 
-  // candidatos com mesmo baseName, preferir os que tem mais qty
-  const candidates = estoque
-    .filter(p => baseName(p.nome) === base && p.qtd > 0)
-    .sort((a,b) => b.qtd - a.qtd);
+  if(totalAvailable <= 0) return { allocations: [], shortage: qty };
 
-  let remaining = qty;
-  const allocations = [];
-  for (const c of candidates) {
-    if (remaining <= 0) break;
-    const take = Math.min(c.qtd, remaining);
-    if (take <= 0) continue;
-    // decrementar stock
-    c.qtd = c.qtd - take;
-    allocations.push({ id: c.id, nome: c.nome, local: c.local, reserved: take });
-    remaining -= take;
+  // primera asignación proporcional (floor)
+  let allocations = [];
+  let allocatedSum = 0;
+  const provisional = candidates.map(c => {
+    const share = Math.floor(qty * (c.qtd / totalAvailable));
+    const take = Math.min(share, c.qtd);
+    allocatedSum += take;
+    return { c, take };
+  });
+
+  // distribuir el remanente (por ejemplo por mayor stock remanente)
+  let remaining = qty - allocatedSum;
+  if (remaining > 0) {
+    // ordenar candidatos por (qtd - take) descendente (más capacidad restante)
+    const order = provisional.slice().sort((a,b) => (b.c.qtd - a.c.qtd) - (a.c.qtd - b.c.qtd));
+    for (const p of order) {
+      if (remaining <= 0) break;
+      const canTake = Math.min(remaining, p.c.qtd - p.take);
+      if (canTake > 0) {
+        p.take += canTake;
+        remaining -= canTake;
+      }
+    }
   }
-  // persist changes to localStorage will be done by caller after all allocations
-  return { allocations, shortage: remaining };
+
+  // si todavía queda remaining porque alguno estaba lleno, intentar tomar de cualquier candidato con stock sobrante
+  if (remaining > 0) {
+    for (const p of provisional) {
+      if (remaining <= 0) break;
+      const canTake = Math.min(remaining, p.c.qtd - p.take);
+      if (canTake > 0) {
+        p.take += canTake;
+        remaining -= canTake;
+      }
+    }
+  }
+
+  // aplicar decrementos y construir allocations
+  provisional.forEach(p => {
+    if (p.take > 0) {
+      p.c.qtd -= p.take;
+      allocations.push({ id: p.c.id, nome: p.c.nome, local: p.c.local, reserved: p.take });
+    }
+  });
+
+  const shortage = Math.max(0, qty - allocations.reduce((s,a)=>s+a.reserved,0));
+  return { allocations, shortage };
 }
 
-/* ------------------ Navegação / render ------------------ */
+/* NAVEGAÇÃO / RENDERING */
 function trocarCategoria(cat) { catAtual = cat; setorAtual = ""; renderizar(); }
 function renderizar() {
   const titulo = document.getElementById('titulo-pagina');
@@ -199,7 +228,6 @@ function renderizar() {
   });
   corpo.innerHTML = html + "</tbody></table>";
 }
-
 function abrirSetor(s) { setorAtual = s; renderizarSetor(); }
 function renderizarSetor() {
   const navBar = document.getElementById('navegacao');
@@ -220,7 +248,6 @@ function renderizarSetor() {
   });
   document.getElementById('corpo-pagina').innerHTML = html + "</tbody></table>";
 }
-
 function ajustarEstoque(id, valor) {
   const item = estoque.find(i=>i.id===id);
   if(!item) return;
@@ -229,13 +256,12 @@ function ajustarEstoque(id, valor) {
   if(setorAtual) renderizarSetor(); else renderizar();
 }
 
-/* ------------------ Editor de Propostas ------------------ */
+/* EDITOR DE PROPOSTAS (cliente) */
 function openProposal(tipo) {
   currentProposal = { tipo, nivel: null, selections: [] };
   document.getElementById('navegacao').innerHTML = `<span onclick="currentProposal=null; document.getElementById('proposal-preview').innerHTML='';">Início</span> > <b>Proposta: ${tipo}</b>`;
   renderProposalEditor(tipo);
 }
-
 function renderProposalEditor(tipo) {
   const preview = document.getElementById('proposal-preview');
   const niveles = Object.keys(propostas[tipo]||{});
@@ -254,16 +280,14 @@ function renderProposalEditor(tipo) {
   </div>`;
   preview.innerHTML = html;
 }
-
 function selectPackage(nivel) {
   currentProposal.nivel = nivel;
   document.querySelectorAll('.pkg').forEach(el=>el.classList.remove('active'));
   const el = document.getElementById('pkg-'+nivel);
   if(el) el.classList.add('active');
 
-  // carregar itens da proposta
+  // carregar itens da proposta e mostrar disponibilidade total (agregada)
   const items = propostas[currentProposal.tipo][nivel] || [];
-  // reset selections to match items
   currentProposal.selections = items.map(it => ({ id: it.id, qty: it.qty, selected: true }));
 
   let html = `<div style="margin-top:10px"><strong>Itens sugeridos (ajuste quantidade se necessário)</strong></div>`;
@@ -279,138 +303,166 @@ function selectPackage(nivel) {
   html += `</div>`;
   document.getElementById('pkg-items').innerHTML = html;
 }
-
 function toggleSelection(id) {
   const s = currentProposal.selections.find(x=>x.id===id);
   if(s) s.selected = !s.selected;
   else currentProposal.selections.push({id, qty:1, selected:false});
 }
-
 function updateQty(id) {
   const v = parseInt(document.getElementById('qty-'+id).value || 0, 10);
   const s = currentProposal.selections.find(x=>x.id===id);
   if(s) s.qty = Math.max(1, v);
 }
-
 function clearProposal() {
   currentProposal = null;
   document.getElementById('proposal-preview').innerHTML = '';
   document.getElementById('navegacao').innerHTML = '';
 }
 
-/* ------------------ Confirmar proposta: reserva agregada ------------------ */
+/* CONFIRMAR: reserva proporcional entre ubicaciones y notificación click-to-chat */
 function confirmProposal() {
   if(!currentProposal || !currentProposal.nivel) {
     alert('Escolha primeiro o nível (Básico / Top / Premium).');
     return;
   }
 
-  const finalReserved = []; // acumula todas as alocações
+  const finalAllocations = [];
   const shortages = [];
   const equipIssues = [];
 
-  // iterate selections and reserve across locations
   for (const sel of currentProposal.selections) {
     if (!sel.selected) continue;
     const prod = estoque.find(p => p.id === sel.id);
     if (!prod) continue;
 
-    // equipamento: checar disponibilidade antes de alocar
     if (prod.tipo === 'equipamento') {
       const st = equipamentosStatus[prod.id];
       if (st && st.status === 'em evento') {
         equipIssues.push({ nome: prod.nome, onde: st.onde });
-        // we still allow reserve attempt (depending on policy) — here we won't decrement equipamento if it's em evento
+        // no decrementar equipamento en este caso
         continue;
       }
-    }
-
-    // verificar disponibilidade total
-    const totalAvailable = totalAvailableFor(sel.id);
-    if (totalAvailable <= 0) {
-      shortages.push({ id: prod.id, nome: prod.nome, need: sel.qty });
-      continue;
-    }
-
-    // reserva agregada
-    const { allocations, shortage } = reserveAcrossLocations(sel.id, sel.qty);
-
-    // guardar allocations
-    allocations.forEach(a => finalReserved.push(a));
-    if (shortage > 0) {
-      shortages.push({ id: prod.id, nome: prod.nome, need: shortage });
+      // si disponible, reservar normalmente (equipamento suele tener 1 o pocos)
+      const { allocations, shortage } = reserveAcrossLocationsProportional(sel.id, sel.qty);
+      allocations.forEach(a=> finalAllocations.push(a));
+      if (shortage > 0) shortages.push({ id: prod.id, nome: prod.nome, need: shortage });
+    } else {
+      const { allocations, shortage } = reserveAcrossLocationsProportional(sel.id, sel.qty);
+      allocations.forEach(a=> finalAllocations.push(a));
+      if (shortage > 0) shortages.push({ id: prod.id, nome: prod.nome, need: shortage });
     }
   }
 
-  // persistir estoque atualizado (as reservas decrementaram in-place)
+  // persistir estoque
   localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
 
-  // construir e renderizar a proposta com alocações detalhadas
-  renderProposalCard(currentProposal, finalReserved, shortages, equipIssues);
+  // Guardar última propuesta y las asignaciones para el staff (en localStorage)
+  const timestamp = new Date().toISOString();
+  const lastProposal = { tipo: currentProposal.tipo, nivel: currentProposal.nivel, allocations: finalAllocations, shortages, equipIssues, timestamp };
+  localStorage.setItem('last_proposal', JSON.stringify(lastProposal));
 
-  // atualizar painel do staff
+  // Render propuesta para cliente (sin mostrar origenes, solo totales)
+  renderClientProposalCard(lastProposal);
+
+  // Actualizar panel staff (allí estarán las asignaciones con origen)
   renderStaffPanel();
 
-  // finalizar
+  // Notificar por WhatsApp (click-to-chat) al staff si número configurado
+  const staffPhone = localStorage.getItem('staff_phone') || '';
+  if (staffPhone) {
+    const msg = buildWhatsAppMessage(lastProposal);
+    // abrir wa.me en nueva pestaña
+    const url = `https://wa.me/${encodeURIComponent(staffPhone)}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  } else {
+    // si no hay número, mostrar aviso para que staff lo configure
+    document.getElementById('proposal-result')?.innerText = "Reserva realizada. Configure o número do staff para enviar notificação por WhatsApp.";
+  }
+
   currentProposal = null;
-  document.getElementById('proposal-result')?.innerText = "Reserva realizada (ver detalhes da proposta).";
+  document.getElementById('proposal-result')?.innerText = "Reserva realizada com sucesso.";
 }
 
-/* ------------------ Render proposta bonita ------------------ */
-function renderProposalCard(proposta, allocations, shortages, equipIssues) {
+/* Construye el mensaje de WhatsApp con asignaciones y faltas */
+function buildWhatsAppMessage(proposal) {
+  const lines = [];
+  lines.push(`Proposta confirmada: ${proposal.tipo} — Nível: ${proposal.nivel}`);
+  lines.push(`Data: ${new Date(proposal.timestamp).toLocaleString()}`);
+  lines.push('');
+  if (proposal.allocations.length) {
+    lines.push('Itens reservados (origem):');
+    // agrupar por nome
+    const grouped = {};
+    proposal.allocations.forEach(a => {
+      grouped[a.nome] = grouped[a.nome] || [];
+      grouped[a.nome].push(a);
+    });
+    Object.keys(grouped).forEach(nome => {
+      lines.push(`- ${nome}:`);
+      grouped[nome].forEach(g => {
+        lines.push(`   • ${g.reserved} — ${g.local}`);
+      });
+    });
+  } else {
+    lines.push('Nenhum item reservado.');
+  }
+  if (proposal.shortages && proposal.shortages.length) {
+    lines.push('');
+    lines.push('Faltas / Necessário comprar:');
+    proposal.shortages.forEach(s => {
+      lines.push(`- ${s.nome} — falta ${s.need}`);
+    });
+  }
+  if (proposal.equipIssues && proposal.equipIssues.length) {
+    lines.push('');
+    lines.push('Equipamentos indisponíveis:');
+    proposal.equipIssues.forEach(e => lines.push(`- ${e.nome} — ${e.onde}`));
+  }
+  lines.push('');
+  lines.push('Ver painel do staff para detalhes.');
+  return lines.join('\n');
+}
+
+/* Render cliente: muestra solo totales (sin origenes) y permite exportar la propuesta cliente */
+function renderClientProposalCard(proposal) {
   const container = document.getElementById('proposal-preview');
 
-  // Agrupar allocations por produto para exibição
-  const grouped = {};
-  allocations.forEach(a=>{
+  // agrupar allocations por producto para totales
+  const totals = {};
+  proposal.allocations.forEach(a => {
     const key = a.nome;
-    grouped[key] = grouped[key] || [];
-    grouped[key].push(a);
+    totals[key] = (totals[key] || 0) + a.reserved;
   });
 
   let html = `<div style="margin-top:14px" class="card">
     <div class="proposal-card" id="proposal-card">
       <div class="proposal-header">
-        <div><h2>Proposta: ${proposta.tipo}</h2><small>Nível: ${proposta.nivel}</small></div>
+        <div><h2>Proposta: ${proposal.tipo}</h2><small>Nível: ${proposal.nivel}</small></div>
         <div style="text-align:right"><strong>Além do Bolo</strong><br><small>Gestão Buffet Rio</small></div>
       </div>
-      <div><strong>Itens reservados (origem):</strong></div>
+      <div><strong>Itens reservados:</strong></div>
       <div class="proposal-items">`;
 
-  if (Object.keys(grouped).length === 0) {
-    html += `<div><em>Nenhum item reservado (verificar disponibilidade ou equipamentos em uso).</em></div>`;
+  if (Object.keys(totals).length === 0) {
+    html += `<div><em>Nenhum item reservado (verificar disponibilidade).</em></div>`;
   } else {
-    Object.keys(grouped).forEach(prodName=>{
-      html += `<div style="margin-top:8px"><strong>${prodName}</strong>`;
-      grouped[prodName].forEach(g=>{
-        html += `<div style="display:flex;justify-content:space-between;padding:4px 0">
-                  <div style="color:#475569">${g.local}</div><div><strong>${g.reserved}</strong></div>
-                 </div>`;
-      });
-      html += `</div>`;
+    Object.keys(totals).forEach(nome => {
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee">
+        <div>${nome}</div><div><strong>${totals[nome]}</strong></div>
+      </div>`;
     });
   }
 
   html += `</div>
-      <div style="margin-top:12px">Observações / disponibilidade:</div>
+      <div style="margin-top:12px">Observações:</div>
       <div style="margin-top:6px">`;
-
-  if (shortages.length) {
-    html += `<div style="color:#b91c1c"><strong>Necessário comprar:</strong><ul>`;
-    shortages.forEach(s=> html += `<li>${s.nome} — falta ${s.need}</li>`);
-    html += `</ul></div>`;
+  if (proposal.shortages.length) {
+    html += `<div style="color:#b91c1c"><strong>Alguns itens em falta — equipe será notificada.</strong></div>`;
   } else {
     html += `<div style="color:#065f46"><strong>Estoque suficiente para os itens selecionados.</strong></div>`;
   }
-
-  if (equipIssues.length) {
-    html += `<div style="margin-top:8px;color:#92400e"><strong>Equipamentos indisponíveis:</strong><ul>`;
-    equipIssues.forEach(e=> html += `<li>${e.nome} — ${e.onde}</li>`);
-    html += `</ul></div>`;
-  }
-
   html += `</div>
-      <div style="margin-top:12px; font-size:0.9rem; color:#475569">Data da proposta: ${new Date().toLocaleString()}</div>
+      <div style="margin-top:12px; font-size:0.9rem; color:#475569">Data da proposta: ${new Date(proposal.timestamp).toLocaleString()}</div>
     </div>
 
     <div style="margin-top:12px; display:flex; gap:8px;">
@@ -422,7 +474,7 @@ function renderProposalCard(proposta, allocations, shortages, equipIssues) {
   container.innerHTML = html;
 }
 
-/* ------------------ Export / Print ------------------ */
+/* Export / Print (cliente) */
 function printProposal() {
   const el = document.getElementById('proposal-card');
   if(!el) return alert('Nenhuma proposta para imprimir.');
@@ -433,7 +485,6 @@ function printProposal() {
   w.document.close();
   w.print();
 }
-
 function exportProposalPNG() {
   const el = document.getElementById('proposal-card');
   if(!el) return alert('Nenhuma proposta para exportar.');
@@ -449,7 +500,7 @@ function exportProposalPNG() {
   });
 }
 
-/* ------------------ Painel do Staff ------------------ */
+/* PAINEL DO STAFF: muestra asignaciones por ubicación, lista de compras y botón click-to-chat */
 function openStaffPanel() {
   currentProposal = null;
   document.getElementById('proposal-preview').innerHTML = '';
@@ -460,6 +511,7 @@ function renderStaffPanel(openNow) {
   const staff = document.getElementById('staff-area');
   const needToBuy = estoque.filter(i => i.qtd < i.min).map(i=>({id:i.id,nome:i.nome,falta: i.min - i.qtd, setor: i.setor}));
   equipamentosStatus = JSON.parse(localStorage.getItem('equip_status')) || equipamentosStatus;
+  const lastProposal = JSON.parse(localStorage.getItem('last_proposal') || 'null');
 
   let html = `<div class="card"><h3>Painel do Staff</h3>`;
   html += `<div style="display:flex;gap:12px;align-items:flex-start">`;
@@ -474,7 +526,8 @@ function renderStaffPanel(openNow) {
   }
   html += `</div>`;
 
-  html += `<div style="width:320px">`;
+  // Right column: equipamentos + config WhatsApp + última proposta con orígenes
+  html += `<div style="width:360px">`;
   html += `<div><strong>Equipamentos</strong></div>`;
   html += `<ul>`;
   Object.keys(equipamentosStatus).forEach(k=>{
@@ -482,13 +535,83 @@ function renderStaffPanel(openNow) {
     const prod = estoque.find(p=>p.id==k);
     html += `<li>${prod?prod.nome:'Equipamento '+k} — <em>${st.status}</em> ${st.onde?'- '+st.onde:''}</li>`;
   });
-  html += `</ul></div></div>`;
+  html += `</ul>`;
+
+  // Phone staff config
+  const staffPhone = localStorage.getItem('staff_phone') || '';
+  html += `<div style="margin-top:8px"><strong>Número do staff (WhatsApp)</strong>`;
+  html += `<input id="staff-phone" class="small" placeholder="5511999999999" value="${staffPhone}">`;
+  html += `<div style="display:flex;gap:6px;margin-top:6px"><button class="btn primary" onclick="saveStaffPhone()">Salvar número</button>`;
+  html += `<button class="btn ghost" onclick="sendLastProposalWhatsApp()">Enviar última proposta por WhatsApp</button></div></div>`;
+
+  // Last proposal details for staff (origins)
+  html += `<div style="margin-top:10px"><strong>Última Proposta (detalhes de origem)</strong>`;
+  if (lastProposal) {
+    html += `<div style="font-size:0.9rem;margin-top:6px"><em>${new Date(lastProposal.timestamp).toLocaleString()}</em></div>`;
+    if (lastProposal.allocations.length) {
+      html += `<div style="margin-top:6px">`;
+      // agrupar por producto
+      const grouped = {};
+      lastProposal.allocations.forEach(a=> {
+        grouped[a.nome] = grouped[a.nome] || [];
+        grouped[a.nome].push(a);
+      });
+      Object.keys(grouped).forEach(nome => {
+        html += `<div style="margin-top:6px"><strong>${nome}</strong>`;
+        grouped[nome].forEach(g => {
+          html += `<div style="display:flex;justify-content:space-between;padding:4px 0">
+                     <div style="color:#475569">${g.local}</div><div><strong>${g.reserved}</strong></div>
+                   </div>`;
+        });
+        html += `</div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<div style="margin-top:6px"><em>Nenhuma alocação.</em></div>`;
+    }
+    if (lastProposal.shortages.length) {
+      html += `<div style="margin-top:8px;color:#b91c1c"><strong>Faltas:</strong><ul>`;
+      lastProposal.shortages.forEach(s=> html += `<li>${s.nome} — falta ${s.need}</li>`);
+      html += `</ul></div>`;
+    }
+    if (lastProposal.equipIssues && lastProposal.equipIssues.length) {
+      html += `<div style="margin-top:8px;color:#92400e"><strong>Equipamentos indisponíveis:</strong><ul>`;
+      lastProposal.equipIssues.forEach(e=> html += `<li>${e.nome} — ${e.onde}</li>`);
+      html += `</ul></div>`;
+    }
+  } else {
+    html += `<div style="margin-top:6px"><em>Nenhuma proposta registrada ainda.</em></div>`;
+  }
+
+  html += `</div>`; // close right column
+  html += `</div>`; // close flex
 
   html += `<div style="margin-top:10px"><small>Última atualização: ${new Date().toLocaleString()}</small></div>`;
   html += `</div>`;
   staff.innerHTML = html;
 
   if(openNow) staff.scrollIntoView({behavior:'smooth'});
+}
+
+/* Guardar número staff */
+function saveStaffPhone() {
+  const el = document.getElementById('staff-phone');
+  if (!el) return;
+  const v = (el.value || '').trim();
+  if (!v) { alert('Informe o telefone no formato internacional sem sinais (ex: 5511999999999)'); return; }
+  localStorage.setItem('staff_phone', v);
+  alert('Número do staff salvo.');
+}
+
+/* Enviar última proposta por WhatsApp (click-to-chat) */
+function sendLastProposalWhatsApp() {
+  const staffPhone = localStorage.getItem('staff_phone') || '';
+  if (!staffPhone) { alert('Configure primeiro o número do staff.'); return; }
+  const lastProposal = JSON.parse(localStorage.getItem('last_proposal') || 'null');
+  if (!lastProposal) { alert('Não há proposta para enviar.'); return; }
+  const msg = buildWhatsAppMessage(lastProposal);
+  const url = `https://wa.me/${encodeURIComponent(staffPhone)}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
 }
 
 /* Inicial render */
