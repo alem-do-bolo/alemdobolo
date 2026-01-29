@@ -1,146 +1,142 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buffet Manager - Sistema Pro</title>
+    <title>Gestão de Buffet Rio - Além do Bolo</title>
     <style>
-        :root { --dark: #121212; --gray: #1e1e1e; --accent: #00e676; --text: #e0e0e0; }
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; background: var(--dark); color: var(--text); }
+        :root { --primaria: #0f172a; --destaque: #10b981; --fundo: #f8fafc; --borda: #e2e8f0; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--fundo); color: #334155; }
         
-        /* Menu Lateral */
-        nav { width: 280px; background: var(--gray); height: 100vh; position: fixed; padding: 20px; border-right: 1px solid #333; }
-        nav h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 30px; letter-spacing: 1px; }
-        .menu-item { width: 100%; padding: 12px; margin-bottom: 10px; background: #252525; border: none; color: white; text-align: left; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-        .menu-item:hover { background: #333; border-left: 4px solid var(--accent); }
-        .sub-label { font-size: 0.75rem; color: #888; margin-left: 5px; text-transform: uppercase; }
+        /* Menu Lateral Estilizado */
+        nav { width: 280px; background: var(--primaria); height: 100vh; position: fixed; padding: 25px; color: white; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        nav h2 { font-size: 1.2rem; color: var(--destaque); margin-bottom: 30px; border-bottom: 1px solid #1e293b; padding-bottom: 15px; }
+        .label-grupo { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; }
+        .btn-menu { width: 100%; padding: 12px; margin-bottom: 8px; background: #1e293b; border: none; color: white; text-align: left; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .btn-menu:hover { background: var(--destaque); color: #0f172a; font-weight: bold; }
 
-        /* Área Principal */
-        main { margin-left: 320px; padding: 40px; width: 100%; }
-        .card { background: var(--gray); padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        /* Navegação tipo "Breadcrumb" */
-        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: var(--accent); cursor: pointer; }
+        /* Área de Conteúdo */
+        main { margin-left: 330px; padding: 40px; width: 100%; }
+        .card { background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--borda); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .caminho { margin-bottom: 20px; font-size: 0.9rem; color: #64748b; cursor: pointer; }
+        .caminho span:hover { color: var(--destaque); text-decoration: underline; }
 
-        /* Tabelas e Itens */
+        /* Tabelas */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; border-bottom: 2px solid #333; color: #888; }
-        td { padding: 15px; border-bottom: 1px solid #333; }
-        
-        .clickable-row { cursor: pointer; transition: 0.2s; }
-        .clickable-row:hover { background: #252525; }
+        th { text-align: left; padding: 15px; background: #f1f5f9; color: #475569; font-size: 0.85rem; }
+        td { padding: 15px; border-bottom: 1px solid var(--borda); }
+        .linha-clicavel { cursor: pointer; transition: 0.2s; }
+        .linha-clicavel:hover { background: #f8fafc; }
 
-        .btn-qty { background: #333; border: 1px solid #444; color: white; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-qty:hover { background: var(--accent); color: black; }
-        
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: #333; }
-        .low { color: #ff5252; border: 1px solid #ff5252; }
+        /* Controles */
+        .btn-qtd { padding: 6px 12px; border: 1px solid var(--borda); background: white; cursor: pointer; border-radius: 4px; }
+        .btn-qtd:hover { background: var(--destaque); border-color: var(--destaque); color: white; }
+        .alerta { color: #ef4444; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <nav>
-    <h2>BUFFET CONTROL</h2>
-    <p class="sub-label">Almacenamiento</p>
-    <button class="menu-item" onclick="viewCategory('Câmara')">🧊 Ítems de Cámara</button>
-    <button class="menu-item" onclick="viewCategory('Freezer')">❄️ Ítems de Freezer</button>
+    <h2>BUFFET RIO PRO</h2>
     
-    <p class="sub-label">Operación</p>
-    <button class="menu-item" onclick="viewCategory('Equipo')">⚡ Equipamientos</button>
-    <button class="menu-item" onclick="viewCategory('Material')">🍽️ Materiales / Vajilla</button>
+    <div class="label-grupo">Armazenamento</div>
+    <button class="btn-menu" onclick="trocarCategoria('Câmara')">📦 Itens de Câmara</button>
+    <button class="btn-menu" onclick="trocarCategoria('Freezer')">❄️ Itens de Freezer</button>
+    
+    <div class="label-grupo">Operacional</div>
+    <button class="btn-menu" onclick="trocarCategoria('Equipamento')">⚡ Equipamentos</button>
+    <button class="btn-menu" onclick="trocarCategoria('Material')">🍽️ Materiais / Louças</button>
 
-    <p class="sub-label">Ventas</p>
-    <button class="menu-item" style="background: var(--accent); color: black;" onclick="alert('Área del Cliente Conectada')">🍴 Modo Cliente</button>
+    <div class="label-grupo">Comercial</div>
+    <button class="btn-menu" style="background: #0ea5e9;" onclick="alert('Sistema de Menu para Clientes integrado!')">🍴 Menu de Propostas</button>
 </nav>
 
 <main>
-    <div id="content-area">
-        <div id="breadcrumb" class="breadcrumb" onclick="renderView()">🏠 Inicio</div>
-        <div class="card">
-            <h1 id="view-title">Seleccione una categoría</h1>
-            <div id="view-body">Elija una opción del menú para comenzar.</div>
-        </div>
+    <div id="navegacao" class="caminho"></div>
+    <div class="card">
+        <h1 id="titulo-pagina">Selecione uma opção ao lado</h1>
+        <div id="corpo-pagina">Escolha uma categoria para gerenciar o estoque.</div>
     </div>
 </main>
 
 <script>
-    // BASE DE DATOS CENTRALIZADA
-    let stock = JSON.parse(localStorage.getItem('buffet_pro_db')) || [
-        { id: 1, cat: "Câmara", local: "Cámara 1", estante: "Estante A", nombre: "Carne Vacuna", qtd: 20, min: 5, info: "220V / Temp -2C" },
-        { id: 2, cat: "Câmara", local: "Cámara 1", estante: "Estante B", nombre: "Pollo Entero", qtd: 15, min: 10, info: "" },
-        { id: 3, cat: "Freezer", local: "Freezer Principal", estante: "Gaveta 1", nombre: "Helado Artesanal", qtd: 10, min: 2, info: "" },
-        { id: 4, cat: "Equipo", local: "Cocina", estante: "Mesada", nombre: "Horno Convector", qtd: 2, min: 0, info: "Serial: 99283 / 220V" },
-        { id: 5, cat: "Material", local: "Depósito", estante: "Caja 10", nombre: "Platos Porcelana", qtd: 100, min: 80, info: "Modelo Blanco" }
+    // Banco de Dados Local
+    let estoque = JSON.parse(localStorage.getItem('buffet_rio_db')) || [
+        { id: 1, cat: "Câmara", local: "Câmara Fria 1", setor: "Estante A", nome: "Carne Bovinas", qtd: 25, min: 10, info: "Temperatura ideal: -2°C" },
+        { id: 2, cat: "Câmara", local: "Câmara Fria 1", setor: "Estante B", nome: "Laticínios", qtd: 8, min: 15, info: "Validade curta" },
+        { id: 3, cat: "Freezer", local: "Freezer Vertical", setor: "Gaveta 1", nome: "Polpas de Fruta", qtd: 40, min: 10, info: "" },
+        { id: 4, cat: "Equipamento", local: "Cozinha Central", setor: "Bancada", nome: "Fritadeira Elétrica", qtd: 2, min: 1, info: "Voltagem: 220V" },
+        { id: 5, cat: "Material", local: "Depósito", setor: "Prateleira 4", nome: "Pratos Rasos", qtd: 150, min: 100, info: "Porcelana Branca" }
     ];
 
-    let currentCat = "";
-    let currentEstante = "";
+    let catAtual = "";
+    let setorAtual = "";
 
-    function viewCategory(cat) {
-        currentCat = cat;
-        currentEstante = ""; // Reseta o filtro de estante
-        renderView();
+    function trocarCategoria(cat) {
+        catAtual = cat;
+        setorAtual = ""; 
+        renderizar();
     }
 
-    function renderView() {
-        const title = document.getElementById('view-title');
-        const body = document.getElementById('view-body');
-        const bread = document.getElementById('breadcrumb');
+    function renderizar() {
+        const titulo = document.getElementById('titulo-pagina');
+        const corpo = document.getElementById('corpo-pagina');
+        const navBar = document.getElementById('navegacao');
 
-        if (!currentCat) return;
+        if (!catAtual) return;
 
-        // SE ESTÁ NA VISÃO DE CATEGORIA (Mostra as Estantes/Gavetas primeiro)
-        if (!currentEstante) {
-            bread.innerHTML = `🏠 Inicio > ${currentCat}`;
-            title.innerText = `Listado de ${currentCat}s`;
+        // VISÃO 1: LISTAR ESTANTES/GAVETAS
+        if (!setorAtual) {
+            navBar.innerHTML = `<span onclick="catAtual='';renderizar()">Início</span> > <b>${catAtual}</b>`;
+            titulo.innerText = `Setores da ${catAtual}`;
             
-            // Agrupa por estante para criar os "links"
-            const estantes = [...new Set(stock.filter(i => i.cat === currentCat).map(i => i.estante))];
+            const setores = [...new Set(estoque.filter(i => i.cat === catAtual).map(i => i.setor))];
             
-            let html = `<table><thead><tr><th>Ubicación / Estante</th><th>Acción</th></tr></thead><tbody>`;
-            estantes.forEach(e => {
-                html += `<tr class="clickable-row" onclick="viewEstante('${e}')">
-                            <td>📂 <b>${e}</b></td>
-                            <td><small>Ver productos →</small></td>
+            let html = `<table><thead><tr><th>Setor / Localização</th><th>Ação</th></tr></thead><tbody>`;
+            setores.forEach(s => {
+                html += `<tr class="linha-clicavel" onclick="abrirSetor('${s}')">
+                            <td>📂 Setor: <b>${s}</b></td>
+                            <td><small>Ver itens deste setor →</small></td>
                          </tr>`;
             });
-            body.innerHTML = html + "</tbody></table>";
+            corpo.innerHTML = html + "</tbody></table>";
         } 
-        // SE ESTÁ DENTRO DE UM ESTANTE (Mostra os produtos)
+        // VISÃO 2: LISTAR PRODUTOS DO SETOR
         else {
-            bread.innerHTML = `<span onclick="currentEstante='';renderView()">🏠 Inicio > ${currentCat}</span> > ${currentEstante}`;
-            title.innerText = `Productos en ${currentEstante}`;
+            navBar.innerHTML = `<span onclick="setorAtual='';renderizar()">Início > ${catAtual}</span> > <b>${setorAtual}</b>`;
+            titulo.innerText = `Itens em: ${setorAtual}`;
             
-            const productos = stock.filter(i => i.cat === currentCat && i.estante === currentEstante);
+            const itens = estoque.filter(i => i.cat === catAtual && i.setor === setorAtual);
             
-            let html = `<table><thead><tr><th>Producto</th><th>Stock</th><th>Info Técnica</th><th>Control</th></tr></thead><tbody>`;
-            productos.forEach(p => {
+            let html = `<table><thead><tr><th>Item</th><th>Qtd</th><th>Info Técnica</th><th>Movimentação</th></tr></thead><tbody>`;
+            itens.forEach(p => {
                 html += `<tr>
-                            <td>${p.nombre}</td>
-                            <td><span class="badge ${p.qtd <= p.min ? 'low' : ''}">${p.qtd}</span></td>
+                            <td><b>${p.nome}</b></td>
+                            <td class="${p.qtd <= p.min ? 'alerta' : ''}">${p.qtd}</td>
                             <td><small>${p.info || '-'}</small></td>
                             <td>
-                                <button class="btn-qty" onclick="updateStock(${p.id}, 1)">+</button>
-                                <button class="btn-qty" onclick="updateStock(${p.id}, -1)">-</button>
+                                <button class="btn-qtd" onclick="ajustarEstoque(${p.id}, 1)">+</button>
+                                <button class="btn-qtd" onclick="ajustarEstoque(${p.id}, -1)">-</button>
                             </td>
                          </tr>`;
             });
-            body.innerHTML = html + "</tbody></table>";
+            corpo.innerHTML = html + "</tbody></table>";
         }
     }
 
-    function viewEstante(e) {
-        currentEstante = e;
-        renderView();
+    function abrirSetor(s) {
+        setorAtual = s;
+        renderizar();
     }
 
-    function updateStock(id, val) {
-        const item = stock.find(i => i.id === id);
-        item.qtd = Math.max(0, item.qtd + val);
-        localStorage.setItem('buffet_pro_db', JSON.stringify(stock));
-        renderView();
+    function ajustarEstoque(id, valor) {
+        const item = estoque.find(i => i.id === id);
+        item.qtd = Math.max(0, item.qtd + valor);
+        localStorage.setItem('buffet_rio_db', JSON.stringify(estoque));
+        renderizar();
     }
 </script>
 
 </body>
 </html>
+
